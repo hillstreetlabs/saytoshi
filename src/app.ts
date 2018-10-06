@@ -9,6 +9,7 @@ import { Tweeter, Tweet } from "./models";
 import BlockWatcher from "./BlockWatcher";
 import { BigNumber } from "bignumber.js";
 import Web3 = require("web3");
+import next = require("next");
 
 export default async function createApp() {
   const provider = new Web3.providers.HttpProvider(process.env.ETHEREUM_HTTP);
@@ -73,12 +74,10 @@ export default async function createApp() {
   app.use(cors());
   app.use(compression());
 
-  app.get("/", async (_req, res) => {
-    // Health check
-    res.json({
-      ready: true
-    });
-  });
+  const dev = process.env.NODE_ENV !== "production";
+  const nextApp = next({ dev });
+  const handle = nextApp.getRequestHandler();
+  await nextApp.prepare();
 
   const formatError = (error: any) => {
     return {
@@ -98,8 +97,20 @@ export default async function createApp() {
     }))
   );
 
-  await mongoose.connect(process.env.MONGODB_URL);
+  // Github OAuth
 
+  // app.get('/auth/github/callback',
+  // passport.authenticate('github', { failureRedirect: '/faucet' }),
+  // function(_req, res) {
+  //   // Successful authentication, redirect home.
+  //   res.redirect('/faucet');
+  // });
+
+  app.get("*", (req, res) => {
+    return handle(req, res);
+  });
+
+  await mongoose.connect(process.env.MONGODB_URL);
   // Make sure there is at least one tweeter
   const tweeterCount = await Tweeter.countDocuments({});
   if (tweeterCount <= 0) {

@@ -6,3 +6,4 @@ yarn-error.log
 .env.prod
 .DS_Store
 dump.rdb
+.next
