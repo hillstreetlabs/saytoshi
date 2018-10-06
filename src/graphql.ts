@@ -1,7 +1,8 @@
 import { makeExecutableSchema } from "graphql-tools";
 import { GraphQLScalarType } from "graphql";
-import { Tweet, Tweeter } from "./models";
+import { Tweet, Tweeter, TweeterModel } from "./models";
 import BlockWatcher from "./BlockWatcher";
+import createTweet from "./mutations/createTweet";
 
 const typeDefs = `
   scalar Date
@@ -9,6 +10,7 @@ const typeDefs = `
   type Query {
     pendingTweets: [Tweet]
     proposedTweets: [Tweet]
+    tweeters: [Tweeter]
   }
 
   type Mutation {
@@ -17,6 +19,7 @@ const typeDefs = `
 
   input CreateTweetInput {
     text: String!
+    tweeterId: String!
   }
 
   enum TweetStatus {
@@ -33,6 +36,11 @@ const typeDefs = `
     status: TweetStatus
     tweeterId: String
   }
+
+  type Tweeter {
+    id: ID
+    handle: String
+  }
 `;
 
 const resolvers = [
@@ -45,6 +53,10 @@ const resolvers = [
       proposedTweets: async () => {
         const tweets = await Tweet.find({ status: "proposed" });
         return tweets;
+      },
+      tweeters: async () => {
+        const tweeters = await Tweeter.find();
+        return tweeters;
       }
     },
     Mutation: {
@@ -60,15 +72,8 @@ const resolvers = [
         },
         ctx: { watcher: BlockWatcher }
       ) {
-        const tweeter = await Tweeter.findOne();
-        const tweeterId = tweeter ? tweeter._id.toString() : undefined;
-        const tweet = await Tweet.create({
-          text: input.text,
-          status: "pending",
-          tweeterId
-        });
+        const tweet = await createTweet(input);
         ctx.watcher.__test_proposal(tweet.uuid);
-        console.log(tweet);
         return tweet;
       }
     },
@@ -76,7 +81,8 @@ const resolvers = [
       name: "Date",
       serialize: (date: Date) => date.getTime()
     }),
-    Tweet: {}
+    Tweet: {},
+    Tweeter: { id: (tweeter: TweeterModel) => tweeter._id.toString() }
   }
 ];
 

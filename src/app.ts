@@ -13,23 +13,17 @@ import { BigNumber } from "bignumber.js";
 import Web3 = require("web3");
 import next = require("next");
 import passport = require("passport");
+import airdropTokens from "./mutations/airdropTokens";
+import closeTweetVoting from "./mutations/closeTweetVoting";
+import bodyParser = require("body-parser");
 var GitHubStrategy = require("passport-github").Strategy;
+var TwitterStrategy = require("passport-twitter").Strategy;
 
 export default async function createApp() {
   const provider = new Web3.providers.HttpProvider(process.env.ETHEREUM_HTTP);
   const web3 = new Web3(provider);
 
   const watcher = new BlockWatcher(web3);
-
-  async function closeTweetVoting() {
-    // TODO: calling functions on
-    const abi: any[] = [];
-    const CONTRACT_ADDRESS = "0x0";
-    const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
-    contract;
-
-    // TODO: post tweet
-  }
 
   async function handleTweetProposed({
     uuid,
@@ -46,7 +40,7 @@ export default async function createApp() {
     );
     // Set timeout for scheduling 😎
     const remainingTime = timestamp.getTime() - Date.now() + 1000;
-    setTimeout(closeTweetVoting, remainingTime);
+    setTimeout(() => closeTweetVoting(web3, uuid), remainingTime);
   }
 
   async function handleVoteAdded({
@@ -77,7 +71,8 @@ export default async function createApp() {
   const app = express();
   app.use(cors());
   app.use(compression());
-  app.use(require("body-parser").urlencoded({ extended: true }));
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
   app.use(passport.initialize());
   app.use(session({ secret: "secret" }));
 
@@ -129,10 +124,11 @@ export default async function createApp() {
 
         // TODO: actually send the mint transaction here
         try {
-          const airdrop = await Airdrop.create({
-            githubUsername: profile.username,
-            address: req.session.address
-          });
+          const airdrop = await airdropTokens(
+            web3,
+            profile.username,
+            req.session.address
+          );
           cb(null, airdrop);
         } catch (e) {
           console.error(e);
@@ -141,7 +137,6 @@ export default async function createApp() {
       }
     )
   );
-
   app.get(
     "/airdrop/to/:address",
     async (req, _res, next) => {
@@ -149,8 +144,7 @@ export default async function createApp() {
       req.session.address = address;
       next();
     },
-    passport.authenticate("github"),
-    (_req, _res) => {}
+    passport.authenticate("github")
   );
   app.get(
     "/auth/github/callback",
@@ -166,6 +160,42 @@ export default async function createApp() {
     }
   );
 
+  // Twitter oauth
+  passport.use(
+    new TwitterStrategy(
+      {
+        consumerKey: process.env.TWITTER_CONSUMER_KEY,
+        consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+        callbackURL: `${process.env.URL}/auth/twitter/callback`
+      },
+      async function(token: any, tokenSecret: any, profile: any, cb: any) {
+        try {
+          const tweeter = await Tweeter.create({
+            token,
+            tokenSecret,
+            handle: profile.username
+          });
+          cb(null, tweeter);
+        } catch (e) {
+          cb(null, false);
+        }
+      }
+    )
+  );
+  app.get("/auth/twitter", passport.authenticate("twitter"));
+  app.get(
+    "/auth/twitter/callback",
+    passport.authenticate("twitter", {
+      failureRedirect: "/connect",
+      session: false
+    }),
+    function(_req, res) {
+      // Successful authentication, redirect home.
+      res.redirect("/?createdTweeter");
+    }
+  );
+
+  // Custom next routes
   app.get("/airdrop", (req, res) => {
     return handle(req, res);
   });
@@ -194,13 +224,6 @@ export default async function createApp() {
   });
 
   await mongoose.connect(process.env.MONGODB_URL);
-  // Make sure there is at least one tweeter
-  const tweeterCount = await Tweeter.countDocuments({});
-  if (tweeterCount <= 0) {
-    await Tweeter.create({ handle: "example" });
-  }
-
   const server = createServer(app);
-
   return { server, watcher, web3 };
 }

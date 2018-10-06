@@ -20,6 +20,8 @@ export type TweetModel = mongoose.Document & {
     | "tweeted";
   stake: string;
   votes: VoteModel[];
+  tweeterId: string;
+  tweetId: string;
 };
 
 const tweetSchema = new mongoose.Schema(
@@ -29,6 +31,7 @@ const tweetSchema = new mongoose.Schema(
     tweeterId: mongoose.SchemaTypes.ObjectId,
     status: String,
     stake: String,
+    tweetId: String,
     votes: [{ voter: String, timestamp: Date, isYes: Boolean, stake: String }]
   },
   { timestamps: true }
