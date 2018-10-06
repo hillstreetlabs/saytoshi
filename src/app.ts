@@ -106,6 +106,13 @@ export default async function createApp() {
   //   res.redirect('/faucet');
   // });
 
+  // Custom route
+  app.get("/:username", (req, res) => {
+    const actualPage = "/tweet";
+    const queryParams = { username: req.params.username };
+    nextApp.render(req, res, actualPage, queryParams);
+  });
+
   app.get("*", (req, res) => {
     return handle(req, res);
   });

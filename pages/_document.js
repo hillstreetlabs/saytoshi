@@ -45,6 +45,7 @@ export default class TheDocument extends Document {
     return (
       <html>
         <Head>
+          <title>SayToshi</title>
           <meta
             name="viewport"
             content="initial-scale=1.0, width=device-width"
