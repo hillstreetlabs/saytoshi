@@ -1,15 +1,19 @@
 import express = require("express");
+import { Request } from "express";
 import cors = require("cors");
 import { createServer } from "http";
 import compression = require("compression");
+import session = require("express-session");
 import getSchema from "./graphql";
 import graphQLHttp = require("express-graphql");
 import mongoose = require("mongoose");
-import { Tweeter, Tweet } from "./models";
+import { Tweeter, Tweet, Airdrop } from "./models";
 import BlockWatcher from "./BlockWatcher";
 import { BigNumber } from "bignumber.js";
 import Web3 = require("web3");
 import next = require("next");
+import passport = require("passport");
+var GitHubStrategy = require("passport-github").Strategy;
 
 export default async function createApp() {
   const provider = new Web3.providers.HttpProvider(process.env.ETHEREUM_HTTP);
@@ -73,6 +77,9 @@ export default async function createApp() {
   const app = express();
   app.use(cors());
   app.use(compression());
+  app.use(require("body-parser").urlencoded({ extended: true }));
+  app.use(passport.initialize());
+  app.use(session({ secret: "secret" }));
 
   const dev = process.env.NODE_ENV !== "production";
   const nextApp = next({ dev });
@@ -99,12 +106,65 @@ export default async function createApp() {
 
   // Github OAuth
 
-  // app.get('/auth/github/callback',
-  // passport.authenticate('github', { failureRedirect: '/faucet' }),
-  // function(_req, res) {
-  //   // Successful authentication, redirect home.
-  //   res.redirect('/faucet');
-  // });
+  passport.use(
+    new GitHubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: `${process.env.URL}/auth/github/callback`,
+        passReqToCallback: true
+      },
+      async function(
+        req: Request,
+        _accessToken: any,
+        _refreshToken: any,
+        profile: any,
+        cb: any
+      ) {
+        const currentAirdrop = await Airdrop.findOne({
+          githubUsername: profile.username
+        });
+        console.log(currentAirdrop);
+        if (currentAirdrop) return cb(null, { claimed: true });
+
+        // TODO: actually send the mint transaction here
+        try {
+          const airdrop = await Airdrop.create({
+            githubUsername: profile.username,
+            address: req.session.address
+          });
+          cb(null, airdrop);
+        } catch (e) {
+          console.error(e);
+          cb(null, false);
+        }
+      }
+    )
+  );
+
+  app.get(
+    "/airdrop/to/:address",
+    async (req, _res, next) => {
+      const address = req.params.address.toLowerCase();
+      req.session.address = address;
+      next();
+    },
+    passport.authenticate("github"),
+    (_req, _res) => {}
+  );
+  app.get(
+    "/auth/github/callback",
+    passport.authenticate("github", {
+      failureRedirect: "/airdrop?failure",
+      session: false
+    }),
+    function(req, res) {
+      if (req.user.claimed) res.redirect(`/airdrop?failure=claimed`);
+      else
+        // Successful authentication, redirect home.
+        res.redirect(`/airdrop?airdropId=${req.user._id}`);
+    }
+  );
 
   app.get("*", (req, res) => {
     return handle(req, res);
