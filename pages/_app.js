@@ -28,7 +28,7 @@ export default class MyApp extends App {
     return (
       <Container>
         <Head>
-          <title>Veil | Markets on everything, by everyone</title>
+          <title>SayToshi | Ethereum's social media manager</title>
         </Head>
         <Provider store={this.store}>
           <Component {...pageProps} />

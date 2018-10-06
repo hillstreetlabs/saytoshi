@@ -166,6 +166,10 @@ export default async function createApp() {
     }
   );
 
+  app.get("/airdrop", (req, res) => {
+    return handle(req, res);
+  });
+
   // Custom routes
   app.get("/:username", (req, res) => {
     const actualPage = "/tweet";
