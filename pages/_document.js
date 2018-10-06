@@ -5,20 +5,22 @@ import { extractCritical } from "emotion-server";
 injectGlobal`
   html, body {
     margin: 0;
-    background-color: white;
     min-height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-      Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji",
-      "Segoe UI Emoji", "Segoe UI Symbol";
+    font-family: Roboto, sans-serif;
   }
 
   * {
     box-sizing: border-box;
   }
 
-  p, h1, h2, h3, h4, h5 {
+  h1, h2, h3, h4, h5 {
     margin: 0;
     padding: 0;
+    font-family: Rubik, sans-serif;
+  }
+
+  p, input, textarea {
+    font-family: Roboto, sans-serif;
   }
 
   input:focus, button:focus, textarea:focus {
@@ -56,6 +58,10 @@ export default class TheDocument extends Document {
           />
           <link
             href="https://fonts.googleapis.com/css?family=Rubik:300,400,500"
+            rel="stylesheet"
+          />
+          <link
+            href="https://fonts.googleapis.com/css?family=Roboto:400,500"
             rel="stylesheet"
           />
           <link
