@@ -7,6 +7,7 @@
     "@types/graphql": "^14.0.1",
     "@types/mongoose": "^5.2.18",
     "@types/web3": "^1.0.6",
+    "bignumber.js": "^7.2.1",
     "compression": "^1.7.3",
     "cors": "^2.8.4",
     "dotenv": "^6.0.0",

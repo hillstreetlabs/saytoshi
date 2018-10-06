@@ -7,10 +7,69 @@ import graphQLHttp = require("express-graphql");
 import mongoose = require("mongoose");
 import { Tweeter, Tweet } from "./models";
 import BlockWatcher from "./BlockWatcher";
+import { BigNumber } from "bignumber.js";
+import Web3 = require("web3");
 
 export default async function createApp() {
-  const app = express();
+  const provider = new Web3.providers.HttpProvider(process.env.ETHEREUM_HTTP);
+  const web3 = new Web3(provider);
 
+  const watcher = new BlockWatcher(web3);
+
+  async function closeTweetVoting() {
+    // TODO: calling functions on
+    const abi: any[] = [];
+    const CONTRACT_ADDRESS = "0x0";
+    const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+    contract;
+
+    // TODO: post tweet
+  }
+
+  async function handleTweetProposed({
+    uuid,
+    stake,
+    timestamp
+  }: {
+    uuid: string;
+    stake: BigNumber;
+    timestamp: Date;
+  }) {
+    await Tweet.updateOne(
+      { uuid },
+      { status: "proposed", stake: stake.toString() }
+    );
+    // Set timeout for scheduling 😎
+    const remainingTime = timestamp.getTime() - Date.now() + 1000;
+    setTimeout(closeTweetVoting, remainingTime);
+  }
+
+  async function handleVoteAdded({
+    uuid,
+    isYes,
+    stake,
+    timestamp,
+    voter
+  }: {
+    uuid: string;
+    isYes: boolean;
+    stake: BigNumber;
+    timestamp: Date;
+    voter: string;
+  }) {
+    const newVote = {
+      timestamp,
+      isYes,
+      stake: stake.toString(),
+      voter
+    };
+    await Tweet.update({ uuid }, { $push: { votes: newVote } });
+  }
+
+  watcher.on("tweetProposed", handleTweetProposed);
+  watcher.on("voteAdded", handleVoteAdded);
+
+  const app = express();
   app.use(cors());
   app.use(compression());
 
@@ -28,12 +87,6 @@ export default async function createApp() {
         process.env.NODE_ENV !== "production" ? error.stack.split("\n") : null
     };
   };
-
-  const watcher = new BlockWatcher();
-  watcher.on("tweetProposed", async ({ uuid }) => {
-    await Tweet.updateOne({ uuid }, { status: "proposed" });
-  });
-
   const schema = getSchema();
   app.use(
     "/graphql",
@@ -53,5 +106,7 @@ export default async function createApp() {
     await Tweeter.create({ handle: "example" });
   }
 
-  return createServer(app);
+  const server = createServer(app);
+
+  return { server, watcher, web3 };
 }
