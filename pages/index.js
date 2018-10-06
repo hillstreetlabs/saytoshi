@@ -7,7 +7,7 @@ class TweetLink extends React.Component {
     const { username, children } = this.props;
     return (
       <Link as={`/${username}`} href={`/tweet?username=${username}`}>
-        {children}
+        <a>{children}</a>
       </Link>
     );
   }

@@ -13,6 +13,7 @@ const HeaderContainer = styled("div")`
 
 const Logo = styled("img")`
   height: 100%;
+  cursor: pointer;
 `;
 
 @inject("store")

@@ -7,14 +7,14 @@ import Subheader from "../components/Subheader";
 @inject("store")
 @withRouter
 @observer
-export default class ProposeTweet extends React.Component {
+export default class Queue extends React.Component {
   render() {
     const { username } = this.props.router.query;
     return (
       <div>
         <Header />
         <Subheader username={username} />
-        <div>Tweet!</div>
+        <div>Queue</div>
       </div>
     );
   }

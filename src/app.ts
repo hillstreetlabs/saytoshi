@@ -106,9 +106,21 @@ export default async function createApp() {
   //   res.redirect('/faucet');
   // });
 
-  // Custom route
+  // Custom routes
   app.get("/:username", (req, res) => {
     const actualPage = "/tweet";
+    const queryParams = { username: req.params.username };
+    nextApp.render(req, res, actualPage, queryParams);
+  });
+
+  app.get("/:username/queue", (req, res) => {
+    const actualPage = "/queue";
+    const queryParams = { username: req.params.username };
+    nextApp.render(req, res, actualPage, queryParams);
+  });
+
+  app.get("/:username/vote", (req, res) => {
+    const actualPage = "/vote";
     const queryParams = { username: req.params.username };
     nextApp.render(req, res, actualPage, queryParams);
   });
