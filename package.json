@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "dev": "nodemon"
+  },
   "dependencies": {
     "@babel/plugin-proposal-decorators": "^7.1.2",
     "@types/compression": "^0.0.36",
