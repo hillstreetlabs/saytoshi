@@ -1,6 +1,7 @@
 import { makeExecutableSchema } from "graphql-tools";
 import { GraphQLScalarType } from "graphql";
 import { Tweet, Tweeter } from "./models";
+import BlockWatcher from "./BlockWatcher";
 
 const typeDefs = `
   scalar Date
@@ -27,7 +28,7 @@ const typeDefs = `
   }
 
   type Tweet {
-    _id: ID
+    uuid: ID
     text: String
     status: TweetStatus
     tweeterId: String
@@ -56,7 +57,8 @@ const resolvers = [
             text: string;
             tweeterId: string;
           };
-        }
+        },
+        ctx: { watcher: BlockWatcher }
       ) {
         const tweeter = await Tweeter.findOne();
         const tweeterId = tweeter ? tweeter._id.toString() : undefined;
@@ -65,6 +67,7 @@ const resolvers = [
           status: "pending",
           tweeterId
         });
+        ctx.watcher.__test_proposal(tweet.uuid);
         console.log(tweet);
         return tweet;
       }

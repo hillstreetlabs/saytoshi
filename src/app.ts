@@ -5,7 +5,8 @@ import compression = require("compression");
 import getSchema from "./graphql";
 import graphQLHttp = require("express-graphql");
 import mongoose = require("mongoose");
-import { Tweeter } from "./models";
+import { Tweeter, Tweet } from "./models";
+import BlockWatcher from "./BlockWatcher";
 
 export default async function createApp() {
   const app = express();
@@ -28,23 +29,26 @@ export default async function createApp() {
     };
   };
 
+  const watcher = new BlockWatcher();
+  watcher.on("tweetProposed", async ({ uuid }) => {
+    await Tweet.updateOne({ uuid }, { status: "proposed" });
+  });
+
   const schema = getSchema();
   app.use(
     "/graphql",
-    graphQLHttp({
+    graphQLHttp(req => ({
       schema,
       graphiql: true,
+      context: { req, watcher },
       formatError
-    })
+    }))
   );
 
   await mongoose.connect(process.env.MONGODB_URL);
-  mongoose.Types.ObjectId.prototype.valueOf = function() {
-    return this.toString();
-  };
 
   // Make sure there is at least one tweeter
-  const tweeterCount = await Tweeter.count({});
+  const tweeterCount = await Tweeter.countDocuments({});
   if (tweeterCount <= 0) {
     await Tweeter.create({ handle: "example" });
   }
