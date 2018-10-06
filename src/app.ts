@@ -39,7 +39,9 @@ export default async function createApp() {
       { status: "proposed", stake: stake.toString() }
     );
     // Set timeout for scheduling 😎
-    const remainingTime = timestamp.getTime() - Date.now() + 1000;
+    const expirationTime = timestamp.getTime() + 10 * 1000 * 60;
+    const remainingTime = expirationTime - Date.now() + 1000;
+    console.log("Tweet proposed, will close voting in 10 minutes");
     setTimeout(() => closeTweetVoting(web3, uuid), remainingTime);
   }
 
