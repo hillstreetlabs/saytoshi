@@ -95,7 +95,7 @@ const resolvers = [
     },
     Date: new GraphQLScalarType({
       name: "Date",
-      serialize: (date: Date) => date.getTime()
+      serialize: (date: Date) => date.toISOString()
     }),
     Tweet: {
       tweeter: async (tweet: TweetModel) =>

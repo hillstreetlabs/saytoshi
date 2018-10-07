@@ -19,9 +19,14 @@ import closeProposedTweets from "./mutations/closeProposedTweets";
 import bodyParser = require("body-parser");
 var GitHubStrategy = require("passport-github").Strategy;
 var TwitterStrategy = require("passport-twitter").Strategy;
+var HDWalletProvider = require("truffle-hdwallet-provider");
 
 export default async function createApp() {
-  const provider = new Web3.providers.HttpProvider(process.env.ETHEREUM_HTTP);
+  const provider = new HDWalletProvider(
+    process.env.MNEMONIC,
+    process.env.ETHEREUM_HTTP,
+    1
+  );
   const web3 = new Web3(provider);
 
   const watcher = new BlockWatcher(web3);
@@ -136,8 +141,6 @@ export default async function createApp() {
         });
         console.log(currentAirdrop);
         if (currentAirdrop) return cb(null, { claimed: true });
-
-        // TODO: actually send the mint transaction here
         try {
           const airdrop = await airdropTokens(
             web3,

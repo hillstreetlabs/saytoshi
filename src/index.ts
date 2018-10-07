@@ -2,6 +2,8 @@ require("dotenv").config();
 
 import createApp from "./app";
 
+(global as any).VOTING_TIME = 10 * 60 * 1000;
+
 async function start() {
   const { server, watcher } = await createApp();
 
