@@ -3,6 +3,7 @@ import styled from "react-emotion";
 import { withRouter } from "next/router";
 import Link from "next/link";
 import Spacer from "./Spacer";
+import { utils } from "ethers";
 
 const HeaderContainer = styled("div")`
   width: 100%;
@@ -32,9 +33,12 @@ export default class Header extends React.Component {
           </Link>
           <div style={{ textAlign: "right" }}>
             <div>Balance</div>
-            <div>
-              20 <small>TWEETH</small>
-            </div>
+            {this.props.store.tokenBalance && (
+              <div>
+                {utils.formatEther(this.props.store.tokenBalance)}{" "}
+                <small>TWEETH</small>
+              </div>
+            )}
           </div>
         </HeaderContainer>
         <Spacer />

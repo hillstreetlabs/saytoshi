@@ -22,17 +22,20 @@ export type TweetModel = mongoose.Document & {
   votes: VoteModel[];
   tweeterId: string;
   tweetId: string;
+  yesStake: number;
 };
 
 const tweetSchema = new mongoose.Schema(
   {
     uuid: { type: String, unique: true, index: true },
     text: String,
+    proposedAt: Date,
     tweeterId: mongoose.SchemaTypes.ObjectId,
     status: String,
     stake: String,
     tweetId: String,
-    votes: [{ voter: String, timestamp: Date, isYes: Boolean, stake: String }]
+    votes: [{ voter: String, timestamp: Date, isYes: Boolean, stake: String }],
+    yesStake: Number
   },
   { timestamps: true }
 );

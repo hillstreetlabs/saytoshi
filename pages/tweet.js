@@ -1,4 +1,5 @@
 import { observer, inject } from "mobx-react";
+import { observable } from "mobx";
 import Link from "next/link";
 import { withRouter } from "next/router";
 import styled from "react-emotion";
@@ -8,6 +9,8 @@ import AppLayout from "../components/AppLayout";
 import Spacer from "../components/Spacer";
 import Divider from "../components/Divider";
 import Wrapper from "../components/Wrapper";
+import graphqlFetch from "../web/graphqlFetch";
+import first from "lodash/first";
 
 export const basePadding = 10;
 
@@ -70,6 +73,50 @@ export const FormHeading = styled("h2")`
 @withRouter
 @observer
 export default class ProposeTweet extends React.Component {
+  @observable text = "";
+  @observable error = undefined;
+  @observable uuid = undefined;
+
+  async createTweet() {
+    try {
+      const { username } = this.props.router.query;
+      // Get uuid from server
+      // Get tweeters
+      const tweetersQuery = `
+        query Tweeters {
+          tweeters {
+            handle
+            id
+          }
+        }`;
+      const { tweeters } = await graphqlFetch(tweetersQuery);
+      const tweeter = first(
+        tweeters.filter(tweeter => tweeter.handle === username)
+      );
+      if (!tweeter)
+        return void (this.error = "SayToshi can't tweet from that username 😕");
+      const proposeQuery = `
+        mutation CreateTweet($tweet: CreateTweetInput!) {
+          createTweet(input: $tweet) {
+            uuid
+          }
+        }`;
+      const { createTweet } = await graphqlFetch(proposeQuery, {
+        tweet: {
+          tweeterId: tweeter.id,
+          text: this.text
+        }
+      });
+      const uuid = createTweet.uuid;
+
+      const result = await this.props.store.voterContract.propose("0x" + uuid);
+      this.uuid = uuid;
+    } catch (e) {
+      console.error(e);
+      this.error = "Something went wrong proposing your tweet 😕";
+    }
+  }
+
   render() {
     const { username } = this.props.router.query;
     return (
@@ -77,33 +124,55 @@ export default class ProposeTweet extends React.Component {
         <Spacer />
         <Subheader username={username} selected="tweet" />
         <Spacer size={1.5} />
-        <Box>
-          <FormHeading>
-            What do you want{" "}
-            <strong style={{ fontWeight: 600, textDecoration: "underline" }}>
-              @{username}
-            </strong>{" "}
-            to say?
-          </FormHeading>
-          <Spacer />
-          <Textarea placeholder={"Type your tweet here."} rows={5} />
-          <Spacer />
-          <FormHeading>How much are you staking on this tweet?</FormHeading>
-          <Spacer size={0.5} />
-          <h4 style={{ fontWeight: 400, color: "#555" }}>
-            If your tweet isn't approved, you'll lose this money.
-          </h4>
-          <Spacer />
-          <InputGroup>
-            <Input />
-            <label>TWEETH</label>
-          </InputGroup>
-          <Spacer size={1.25} />
-          <Button>
-            Propose tweet for{" "}
-            <strong style={{ fontWeight: 600 }}>@{username}</strong>
-          </Button>
-        </Box>
+        {this.uuid ? (
+          <Box>
+            <h2>
+              Success. Get people to vote on your tweet{" "}
+              <Link href={`/${username}/${this.uuid}`}>
+                <a>here</a>
+              </Link>
+            </h2>
+          </Box>
+        ) : (
+          <Box>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                this.createTweet();
+              }}
+            >
+              {this.error && <div style={{ color: "red" }}>{this.error}</div>}
+              <FormHeading>
+                What do you want{" "}
+                <strong
+                  style={{ fontWeight: 600, textDecoration: "underline" }}
+                >
+                  @{username}
+                </strong>{" "}
+                to say?
+              </FormHeading>
+              <Spacer />
+              <Textarea placeholder={"Type your tweet here."} rows={5} />
+              <Spacer />
+              <FormHeading>How much are you staking on this tweet?</FormHeading>
+              <Spacer size={0.5} />
+              <h4 style={{ fontWeight: 400, color: "#555" }}>
+                If your tweet isn't approved, you'll lose this money.
+              </h4>
+              <Spacer />
+              <InputGroup>
+                <Input />
+                <label>TWEETH</label>
+              </InputGroup>
+              <Spacer size={1.25} />
+              <Button type="submit">
+                Propose tweet for{" "}
+                <strong style={{ fontWeight: 600 }}>@{username}</strong>
+              </Button>
+            </form>
+          </Box>
+        )}
+
         <Spacer />
       </AppLayout>
     );

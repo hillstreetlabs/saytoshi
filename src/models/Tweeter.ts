@@ -9,7 +9,8 @@ export type TweeterModel = mongoose.Document & {
 const tweeterSchema = new mongoose.Schema({
   handle: String,
   token: String,
-  tokenSecret: String
+  tokenSecret: String,
+  address: String
 });
 
 const Tweeter = mongoose.model<TweeterModel>("Tweeter", tweeterSchema);

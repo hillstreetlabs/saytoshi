@@ -1,25 +1,27 @@
 import Web3 = require("web3");
-import { Airdrop } from "../models";
+import { Tweet } from "../models";
+const TweEthVoter = require("../../abis/TweEthVoter");
 
 export default async function closeTweetVoting(web3: Web3, uuid: string) {
+  let tweet = await Tweet.findOne({ uuid });
+  if (tweet.status !== "proposed") return tweet; // already closed
+
   // TODO: send mint transaction
-  const abi: any[] = [];
-  const CONTRACT_ADDRESS = "0x0";
-  const contract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
-  contract;
+  const contract = new web3.eth.Contract(
+    TweEthVoter,
+    process.env.VOTER_ADDRESS
+  );
+  const proposal = await contract.methods.proposalsByUuid(uuid).call();
+  console.log(proposal);
 
   // TODO: check vote result
   const voteResult: boolean = true;
-  let airdrop;
-
   if (voteResult) {
     // We're a-tweeting!
-    airdrop = await Airdrop.updateOne({ uuid }, { status: "approved" });
-
-    // Queue tweet for tweeting?
+    tweet = await Tweet.updateOne({ uuid }, { status: "accepted" });
   } else {
-    airdrop = await Airdrop.updateOne({ uuid }, { status: "rejected" });
+    tweet = await Tweet.updateOne({ uuid }, { status: "rejected" });
   }
 
-  return airdrop;
+  return tweet;
 }

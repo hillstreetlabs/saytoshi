@@ -1,6 +1,7 @@
 import { observer, inject } from "mobx-react";
 import styled from "react-emotion";
 import Link from "next/link";
+import { withRouter } from "next/router";
 import Spacer from "./Spacer";
 
 const SubheaderLink = styled("a")`
@@ -19,6 +20,7 @@ const SubheaderLink = styled("a")`
   `};
 `;
 
+@withRouter
 @observer
 export default class Subheader extends React.Component {
   render() {
