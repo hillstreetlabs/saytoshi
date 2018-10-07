@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build": "NODE_ENV=production tsc && NODE_ENV=production next build",
+    "start": "NODE_ENV=production node dist/index.js"
   },
   "dependencies": {
     "@babel/plugin-proposal-decorators": "^7.1.2",

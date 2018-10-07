@@ -41,7 +41,10 @@ export default class Revoke extends React.Component {
           </div>
           <Spacer size={1.5} />
           {this.props.store.currentAddress && (
-            <a href={`/auth/twitter`} style={{ textDecoration: "none" }}>
+            <a
+              href={`/auth/twitter/${this.props.store.currentAddress}`}
+              style={{ textDecoration: "none" }}
+            >
               <Button>Connect Twitter</Button>
             </a>
           )}

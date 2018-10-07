@@ -97,8 +97,8 @@ export default async function createApp() {
   app.use(compression());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
-  app.use(passport.initialize());
   app.use(session({ secret: "secret" }));
+  app.use(passport.initialize());
 
   const dev = process.env.NODE_ENV !== "production";
   const nextApp = next({ dev });
@@ -192,6 +192,14 @@ export default async function createApp() {
   );
 
   // Twitter oauth
+  passport.serializeUser(function(user, done) {
+    console.log("Serializing", user);
+    done(null, user);
+  });
+  passport.deserializeUser(function(user, done) {
+    console.log("Deserializing", user);
+    done(null, user);
+  });
   passport.use(
     new TwitterStrategy(
       {
@@ -216,15 +224,18 @@ export default async function createApp() {
           "_200x200"
         );
         if (currentTweeter) {
-          const tweeter = await currentTweeter.update({
-            token,
-            tokenSecret,
-            photo,
-            handle: profile.username,
-            address: req.session.address,
-            followerCount: profile._json.followers_count
-          });
-          cb(null, tweeter);
+          await Tweeter.update(
+            { _id: currentTweeter._id },
+            {
+              token,
+              tokenSecret,
+              photo,
+              handle: profile.username,
+              address: req.session.address,
+              followerCount: profile._json.followers_count
+            }
+          );
+          cb(null, currentTweeter);
         } else {
           const tweeter = await Tweeter.create({
             token,
@@ -251,8 +262,7 @@ export default async function createApp() {
   app.get(
     "/auth/twitter/callback",
     passport.authenticate("twitter", {
-      failureRedirect: "/connect",
-      session: false
+      failureRedirect: "/connect"
     }),
     function(_req, res) {
       // Successful authentication, redirect home.

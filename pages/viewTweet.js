@@ -47,7 +47,6 @@ export default class TweetPage extends React.Component {
     const { tweet } = this.props;
     const votingEndsAt = new Date(tweet.votingEndsAt).getTime();
     const rightNow = now();
-    console.log(rightNow);
     let status = "voting";
     if (rightNow - votingEndsAt > 0) status = "pending";
     if (rightNow - votingEndsAt > 120000) status = "claiming";
