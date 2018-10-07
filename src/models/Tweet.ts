@@ -26,6 +26,7 @@ export type TweetModel = mongoose.Document & {
   yesStake: number;
   totalStake: number;
   proposedAt: Date;
+  tweetedAt: Date;
 };
 
 const tweetSchema = new mongoose.Schema(
@@ -33,6 +34,7 @@ const tweetSchema = new mongoose.Schema(
     uuid: { type: String, unique: true, index: true },
     text: String,
     proposedAt: Date,
+    tweetedAt: Date,
     tweeterId: mongoose.SchemaTypes.ObjectId,
     status: String,
     stake: String,

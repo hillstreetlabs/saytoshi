@@ -32,6 +32,8 @@ const typeDefs = `
     expired
     accepted
     rejected
+    tweeted
+    error
   }
 
   type Tweet {
@@ -45,6 +47,8 @@ const typeDefs = `
     tweetAt: Date
     yesStake: Float
     totalStake: Float
+    tweetedAt: Date
+    tweetId: String
   }
 
   type Tweeter {

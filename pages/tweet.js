@@ -134,7 +134,6 @@ export default class ProposeTweet extends React.Component {
     }
     try {
       const stake = utils.parseEther(this.stake);
-      console.log(stake);
       const result = await this.props.store.voterContract.propose(
         "0x" + uuid,
         stake
@@ -211,7 +210,11 @@ export default class ProposeTweet extends React.Component {
             {this.props.store.currentAddress ? (
               <Button
                 type="submit"
-                disabled={!this.tweetIsReady || this.createStatus !== "none"}
+                disabled={
+                  !this.tweetIsReady ||
+                  (this.createStatus !== "none" &&
+                    this.createStatus !== "error")
+                }
               >
                 {this.createStatus === "signing" && (
                   <span>Check your wallet for details</span>

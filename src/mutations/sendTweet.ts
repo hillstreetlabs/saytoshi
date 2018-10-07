@@ -28,7 +28,7 @@ export default async function sendTweet(uuid: string) {
 
     await Tweet.updateOne(
       { uuid },
-      { status: "tweeted", tweetId: tweetObj.id_str }
+      { status: "tweeted", tweetId: tweetObj.id_str, tweetedAt: new Date() }
     );
   } catch (e) {
     console.error(e);
