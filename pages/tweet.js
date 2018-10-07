@@ -59,6 +59,7 @@ const Button = styled("button")`
   width: 100%;
   display: block;
   font-size: 18px;
+  border: none;
   padding: ${basePadding * 2}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
