@@ -48,6 +48,19 @@ export default class TheDocument extends Document {
       <html>
         <Head>
           <meta
+            name="description"
+            content="Stake tokens to tweet as your favorite crypto influencers."
+          />
+          <meta
+            property="og:title"
+            content="SayToshi | Ethereum's social media manager"
+          />
+          <meta
+            property="og:description"
+            content="Stake tokens to tweet as your favorite crypto influencers."
+          />
+          <meta property="og:image" content="/static/logo.png" />
+          <meta
             name="viewport"
             content="initial-scale=1.0, width=device-width"
           />
