@@ -1,7 +1,6 @@
 import { makeExecutableSchema } from "graphql-tools";
 import { GraphQLScalarType } from "graphql";
 import { Tweet, Tweeter, TweeterModel } from "./models";
-import BlockWatcher from "./BlockWatcher";
 import createTweet from "./mutations/createTweet";
 
 const typeDefs = `
