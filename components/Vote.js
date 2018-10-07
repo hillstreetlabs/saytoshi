@@ -31,8 +31,8 @@ const Button = styled("button")`
   color: white;
   width: 100%;
   display: block;
-  font-size: 16px;
-  padding: ${basePadding * 1.5}px ${basePadding}px;
+  font-size: 18px;
+  padding: ${basePadding * 1.75}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
 
@@ -98,14 +98,14 @@ export default class Vote extends React.Component {
           </h3>
           <Divider padded color={"#dadada"} />
           <FormHeading>
-            Vote amount{" "}
-            <small style={{ fontWeight: 400 }}>20 TWEETH available</small>
+            Vote amount
           </FormHeading>
           <Spacer size={0.5} />
           <InputGroup>
             <Input
               onChange={e => (this.voteAmount = e.target.value)}
               value={this.voteAmount}
+              placeholder="0.0"
             />
             <label>TWEETH</label>
           </InputGroup>
@@ -115,13 +115,14 @@ export default class Vote extends React.Component {
               disabled={!this.isValid}
               onClick={() => this.castVote(true)}
             >
-              Approve
+              👍 Approve
             </ApproveButton>
+            <Spacer inline size={0.5} />
             <RejectButton
               disabled={!this.isValid}
               onClick={() => this.castVote(false)}
             >
-              Reject
+              👎 Reject
             </RejectButton>
           </Flex>
         </Box>
