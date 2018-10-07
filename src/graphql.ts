@@ -12,6 +12,7 @@ const typeDefs = `
     acceptedTweets: [Tweet]
     rejectedTweets: [Tweet]
     tweetedTweets: [Tweet]
+    tweet(uuid: ID!): Tweet
     tweeters: [Tweeter]
   }
 
@@ -85,6 +86,10 @@ const resolvers = [
       tweetedTweets: async () => {
         const tweets = await Tweet.find({ status: "tweeted" });
         return tweets;
+      },
+      tweet: async (_: any, args: { uuid: string }) => {
+        const tweet = await Tweet.findOne({ uuid: args.uuid });
+        return tweet;
       },
       tweeters: async () => {
         const tweeters = await Tweeter.find();
