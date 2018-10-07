@@ -99,7 +99,7 @@ export default class Account extends React.Component {
           <h1>Your votes</h1>
           <div>You've voted on {this.tweets.length} tweet proposals.</div>
         </div>
-        <Spacer />
+        <Spacer size={1.5} />
         {this.tweets.map((tweet, i) => <Vote key={tweet.uuid} tweet={tweet} />)}
         {this.tweets.length === 0 && (
           <div style={{ textAlign: "center" }}>

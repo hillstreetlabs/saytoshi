@@ -18,10 +18,10 @@ import graphqlFetch from "../web/graphqlFetch";
 export default class Queue extends React.Component {
   @observable fetchedTweets = undefined;
 
-  static async getTweets() {
+  static async getTweets(handle) {
     const tweetsQuery = `
-      query AcceptedTweets {
-        acceptedTweets {
+      query AcceptedTweets($handle: String) {
+        acceptedTweets(handle: $handle) {
           uuid
           text
           yesStake
@@ -34,13 +34,13 @@ export default class Queue extends React.Component {
           }
         }
       }`;
-    const { acceptedTweets } = await graphqlFetch(tweetsQuery);
+    const { acceptedTweets } = await graphqlFetch(tweetsQuery, { handle });
     acceptedTweets.sort((a, b) => b.yesStake - a.yesStake);
     return acceptedTweets;
   }
 
-  static async getInitialProps() {
-    const tweets = await Queue.getTweets();
+  static async getInitialProps({ query }) {
+    const tweets = await Queue.getTweets(query.username);
     return { tweets };
   }
 
@@ -53,7 +53,7 @@ export default class Queue extends React.Component {
   }
 
   async refresh() {
-    const tweets = await Queue.getTweets();
+    const tweets = await Queue.getTweets(this.props.router.query.username);
     this.fetchedTweets = tweets;
   }
 
