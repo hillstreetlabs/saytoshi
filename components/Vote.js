@@ -1,7 +1,7 @@
 import { observer, inject } from "mobx-react";
 import { observable, computed, when } from "mobx";
 import Link from "next/link";
-import styled from "react-emotion";
+import styled, { keyframes } from "react-emotion";
 import { withRouter } from "next/router";
 import Header from "./Header";
 import Wrapper from "./Wrapper";
@@ -23,6 +23,12 @@ import Countdown from "react-countdown-now";
 import graphqlFetch from "../web/graphqlFetch";
 import { utils } from "ethers";
 import { now } from "mobx-utils";
+
+const gentlePulseSize = keyframes`
+  0% { transform: scale(1); }
+  20% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+`;
 
 const Flex = styled("div")`
   display: flex;
@@ -139,7 +145,12 @@ class CreatingTweet extends React.Component {
     const { tweet } = this.props;
     return (
       <div>
-        <Box style={{ textAlign: "center" }}>
+        <Box
+          style={{
+            textAlign: "center",
+            animation: `${gentlePulseSize} 1.5s infinite`
+          }}
+        >
           This proposal is being created. Hang tight for a moment!
         </Box>
         <Spacer size={1.5} />
@@ -277,7 +288,12 @@ class PendingTweet extends React.Component {
           </Link>
         </Flex>
         <Spacer size={0.5} />
-        <Box style={{ textAlign: "center" }}>
+        <Box
+          style={{
+            textAlign: "center",
+            animation: `${gentlePulseSize} 1.5s infinite`
+          }}
+        >
           Voting has ended. Results being tallied.
         </Box>
         <Spacer size={1.5} />
@@ -404,6 +420,7 @@ export default class Vote extends React.Component {
   render() {
     const { username } = this.props.router.query;
     const { tweet } = this.props;
+    const { tokenBalance } = this.props.store;
     if (!tweet.votingEndsAt) return <CreatingTweet tweet={tweet} />;
     const votingEndsAt = new Date(tweet.votingEndsAt).getTime();
     const rightNow = now();
@@ -461,25 +478,33 @@ export default class Vote extends React.Component {
               </div>
               <Spacer />
               {this.props.store.hasWeb3 ? (
-                <Flex>
-                  <ApproveButton
-                    disabled={!this.isValid || this.voteStatus !== "none"}
-                    onClick={() => this.castVote(true)}
-                  >
-                    {this.voteStatus === "approving"
-                      ? "Approving..."
-                      : "👍 Approve"}
-                  </ApproveButton>
-                  <Spacer inline size={0.5} />
-                  <RejectButton
-                    disabled={!this.isValid || this.voteStatus !== "none"}
-                    onClick={() => this.castVote(false)}
-                  >
-                    {this.voteStatus === "rejecting"
-                      ? "Rejecting..."
-                      : "👎 Reject"}
-                  </RejectButton>
-                </Flex>
+                tokenBalance > 0 ? (
+                  <Flex>
+                    <ApproveButton
+                      disabled={!this.isValid || this.voteStatus !== "none"}
+                      onClick={() => this.castVote(true)}
+                    >
+                      {this.voteStatus === "approving"
+                        ? "Approving..."
+                        : "👍 Approve"}
+                    </ApproveButton>
+                    <Spacer inline size={0.5} />
+                    <RejectButton
+                      disabled={!this.isValid || this.voteStatus !== "none"}
+                      onClick={() => this.castVote(false)}
+                    >
+                      {this.voteStatus === "rejecting"
+                        ? "Rejecting..."
+                        : "👎 Reject"}
+                    </RejectButton>
+                  </Flex>
+                ) : (
+                  <Alert>
+                    You need TWEETH to do that.{" "}
+                    <Link href="/airdrop">Go claim your tokens</Link> from the
+                    airdrop.
+                  </Alert>
+                )
               ) : (
                 <Alert>
                   Please make sure you are connected to Ethereum and your wallet

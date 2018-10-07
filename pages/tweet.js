@@ -162,6 +162,7 @@ export default class ProposeTweet extends React.Component {
 
   render() {
     const { username } = this.props.router.query;
+    const { tokenBalance } = this.props.store;
     return (
       <AppLayout>
         <Spacer />
@@ -208,28 +209,36 @@ export default class ProposeTweet extends React.Component {
             </InputGroup>
             <Spacer size={1.25} />
             {this.props.store.currentAddress ? (
-              <Button
-                type="submit"
-                disabled={
-                  !this.tweetIsReady ||
-                  (this.createStatus !== "none" &&
-                    this.createStatus !== "error")
-                }
-              >
-                {this.createStatus === "signing" && (
-                  <span>Check your wallet for details</span>
-                )}
-                {this.createStatus === "saving" && (
-                  <span>Proposing your tweet...</span>
-                )}
-                {this.createStatus === "error" ||
-                  (this.createStatus === "none" && (
-                    <span>
-                      Propose tweet for{" "}
-                      <strong style={{ fontWeight: 600 }}>@{username}</strong>
-                    </span>
-                  ))}
-              </Button>
+              tokenBalance > 0 ? (
+                <Button
+                  type="submit"
+                  disabled={
+                    !this.tweetIsReady ||
+                    (this.createStatus !== "none" &&
+                      this.createStatus !== "error")
+                  }
+                >
+                  {this.createStatus === "signing" && (
+                    <span>Check your wallet for details</span>
+                  )}
+                  {this.createStatus === "saving" && (
+                    <span>Proposing your tweet...</span>
+                  )}
+                  {this.createStatus === "error" ||
+                    (this.createStatus === "none" && (
+                      <span>
+                        Propose tweet for{" "}
+                        <strong style={{ fontWeight: 600 }}>@{username}</strong>
+                      </span>
+                    ))}
+                </Button>
+              ) : (
+                <Alert>
+                  You need TWEETH to do that.{" "}
+                  <Link href="/airdrop">Go claim your tokens</Link> from the
+                  airdrop.
+                </Alert>
+              )
             ) : (
               <Alert>
                 Please make sure you are connected to Ethereum and your wallet

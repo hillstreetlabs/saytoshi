@@ -65,8 +65,16 @@ class TweetLink extends React.Component {
     const { tweeter, ...props } = this.props;
     return (
       <Link
-        as={`/${tweeter.handle}`}
-        href={`/tweet?username=${tweeter.handle}`}
+        as={
+          tweeter.openTweetCount > 0
+            ? `/${tweeter.handle}/vote`
+            : `/${tweeter.handle}`
+        }
+        href={
+          tweeter.openTweetCount > 0
+            ? `/vote?username=${tweeter.handle}`
+            : `/tweet?username=${tweeter.handle}`
+        }
       >
         <Tweeter>
           <Flex>
