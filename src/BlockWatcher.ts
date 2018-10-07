@@ -26,7 +26,16 @@ export default class BlockWatcher extends EventEmitter {
       fromBlockNumber: startBlock,
       onAddBlock: async block => {
         console.log("Got block", block.number);
-        await this.checkBlockForLogs(block);
+        while (true) {
+          try {
+            await this.checkBlockForLogs(block);
+            break;
+          } catch (e) {
+            console.log("Error during logs check, trying again soon");
+            console.error(e);
+            await new Promise(resolve => setTimeout(resolve, 3000));
+          }
+        }
       }
     });
 

@@ -4,6 +4,7 @@ import styled from "react-emotion";
 import Header from "../components/Header";
 import AppLayout from "../components/AppLayout";
 import Spacer from "../components/Spacer";
+import Badge from "../components/Badge";
 import Wrapper from "../components/Wrapper";
 import graphqlFetch from "../web/graphqlFetch";
 
@@ -73,8 +74,12 @@ class TweetLink extends React.Component {
             <Spacer inline small />
             <div>
               <h3 style={{ fontWeight: 500 }}>@{tweeter.handle}</h3>
+              <Spacer size={0.2} />
               <div style={{ color: "#555" }}>
-                {tweeter.followerCount} followers
+                {tweeter.followerCount} followers<Spacer inline small />
+                {tweeter.openTweetCount > 0 && (
+                  <Badge color={"#C310CC"}>{tweeter.openTweetCount} open</Badge>
+                )}
               </div>
             </div>
           </Flex>
@@ -100,6 +105,7 @@ export default class Index extends React.Component {
           handle
           photo
           followerCount
+          openTweetCount
         }
       }`;
     const { tweeters } = await graphqlFetch(tweetersQuery);

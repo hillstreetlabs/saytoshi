@@ -56,6 +56,7 @@ const typeDefs = `
     handle: String
     photo: String
     followerCount: Int
+    openTweetCount: Int
   }
 `;
 
@@ -140,7 +141,14 @@ const resolvers = [
         tweet.proposedAt &&
         new Date(tweet.proposedAt.getTime() + (global as any).VOTING_TIME)
     },
-    Tweeter: { id: (tweeter: TweeterModel) => tweeter._id.toString() }
+    Tweeter: {
+      id: (tweeter: TweeterModel) => tweeter._id.toString(),
+      openTweetCount: async (tweeter: TweeterModel) =>
+        await Tweet.countDocuments({
+          tweeterId: tweeter._id,
+          status: "proposed"
+        })
+    }
   }
 ];
 

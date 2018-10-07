@@ -72,15 +72,19 @@ const ProgressInputGroup = styled(InputGroup)`
 `;
 
 const TallyPercentage = styled("div")`
-  height: 5px;
+  height: 7px;
   width: 100%;
-  background-color: #e069c6;
-  border-radius: 4px;
+  background-color: #eee;
+  display: flex;
+  border-radius: 7px;
   overflow: hidden;
-  & > div {
-    height: 5px;
-
+  & > div:first-child {
+    height: 7px;
     background-color: #80dc7a;
+  }
+  & > div:last-child {
+    height: 7px;
+    background-color: #e069c6;
   }
 `;
 
@@ -88,15 +92,42 @@ const TallyPercentage = styled("div")`
 class VoteTally extends React.Component {
   render() {
     const { data } = this.props;
+    const percentageToQuorum = data.percentageToQuorum;
+    const percentageYes = data.percentageYes * (percentageToQuorum / 100);
+    const percentageNo = data.percentageNo * (percentageToQuorum / 100);
     return (
       <div>
         <Flex>
-          <div>{data.percentageYes}% Yes</div>
-          <div>{data.percentageNo}% No</div>
+          <div style={{ textAlign: "left", fontSize: "14px" }}>
+            <b>{data.percentageYes}% Yes</b>
+            <br />
+            <small style={{ color: "#777" }}>
+              {utils.formatEther(data.yesTotal || "0")} TWEETH
+            </small>
+          </div>
+          <div style={{ textAlign: "right", fontSize: "14px" }}>
+            <b>{data.percentageNo}% No</b>
+            <br />
+            <small style={{ color: "#777" }}>
+              {utils.formatEther(data.noTotal || "0")} TWEETH
+            </small>
+          </div>
         </Flex>
+        <Spacer size={0.2} />
         <TallyPercentage>
-          <div style={{ width: data.percentageYes + "%" }} />
+          <div style={{ width: percentageYes + "%" }} />
+          <div style={{ width: percentageNo + "%" }} />
         </TallyPercentage>
+        <Spacer size={0.2} />
+        <div style={{ textAlign: "left", fontSize: "14px" }}>
+          <b>{Math.floor(data.percentageToQuorum)}% of quorum</b>.{" "}
+          {data.percentageToQuorum < 100 && (
+            <small style={{ color: "#777" }}>
+              {utils.formatEther(data.stakeRequired)} additional TWEETH
+              required.
+            </small>
+          )}
+        </div>
       </div>
     );
   }
@@ -260,7 +291,7 @@ class PendingTweet extends React.Component {
 @observer
 export default class Vote extends React.Component {
   @observable voteAmount = "";
-  @observable didVote = true;
+  @observable didVote = false;
   @observable claimableAmount = undefined;
   @observable voteStatus = "none";
   @observable yesTotal = undefined;
