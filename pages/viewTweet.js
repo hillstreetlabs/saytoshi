@@ -17,6 +17,12 @@ import graphqlFetch from "../web/graphqlFetch";
 import { utils } from "ethers";
 import { now } from "mobx-utils";
 
+const Photo = styled("img")`
+  width: 100px;
+  height: 100px;
+  border-radius: 50px;
+`;
+
 @inject("store")
 @withRouter
 @observer
@@ -35,6 +41,8 @@ export default class TweetPage extends React.Component {
           votingEndsAt
           tweeter {
             handle
+            photo
+            followerCount
           }
         }
       }`;
@@ -53,12 +61,25 @@ export default class TweetPage extends React.Component {
     return (
       <AppLayout>
         <Spacer />
-        <Subheader
-          username={this.props.tweet.tweeter.handle}
-          selected={status === "voting" ? "vote" : undefined}
-        />
+        <div style={{ textAlign: "center" }}>
+          <Photo src={tweet.tweeter.photo} />
+          <Spacer size={0.5} />
+          <div>
+            <Link
+              as={`/${tweet.tweeter.handle}`}
+              href={`/tweet?username=${tweet.tweeter.handle}`}
+            >
+              <h2 style={{ cursor: "pointer" }}>@{tweet.tweeter.handle}</h2>
+            </Link>
+            <small>{tweet.tweeter.followerCount} Followers</small>
+          </div>
+        </div>
         <Spacer size={1.5} />
-        {status === "claiming" && <div>Claim</div>}
+        {status === "claiming" && (
+          <Box style={{ textAlign: "center" }}>
+            This vote has resolved. Redeem interface coming soon.
+          </Box>
+        )}
         {status === "pending" && <div>Pending</div>}
         {status === "voting" && <Vote tweet={this.props.tweet} />}
       </AppLayout>

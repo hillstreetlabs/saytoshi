@@ -28,7 +28,7 @@ const SubheaderLink = styled("a")`
 @observer
 export default class Subheader extends React.Component {
   render() {
-    const { username, selected } = this.props;
+    const { username, selected, noNav } = this.props;
     return (
       <div style={{ textAlign: "center" }}>
         <h1>@{username}</h1>

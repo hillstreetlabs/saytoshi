@@ -76,6 +76,16 @@ export const FormHeading = styled("h2")`
   font-weight: 500;
 `;
 
+export const Alert = styled("div")`
+  padding: 20px;
+  text-align: center;
+  border: 2px solid #f420ff;
+  border-radius: 5px;
+  color: #f420ff;
+  font-size: 18px;
+  background-color: rgba(244, 32, 255, 0.1);
+`;
+
 @inject("store")
 @withRouter
 @observer
@@ -129,7 +139,7 @@ export default class ProposeTweet extends React.Component {
         "0x" + uuid,
         stake
       );
-      this.uuid = uuid;
+      this.props.router.push(`/viewTweet?uuid=${uuid}`, `/t/${uuid}`);
     } catch (e) {
       console.log(e);
     }
@@ -157,65 +167,59 @@ export default class ProposeTweet extends React.Component {
         <Spacer />
         <Subheader username={username} selected="tweet" />
         <Spacer size={1.5} />
-        {this.uuid ? (
-          <Box>
-            <h2>
-              Success. Get people to vote on your tweet{" "}
-              <Link href={`/${username}/${this.uuid}`}>
-                <a>here</a>
-              </Link>
-            </h2>
-          </Box>
-        ) : (
-          <Box>
-            <form
-              onSubmit={e => {
-                e.preventDefault();
-                this.createTweet();
-              }}
-            >
-              {this.createStatus === "error" && (
-                <div style={{ color: "red" }}>
-                  Something went wrong creating your proposal 😕
-                </div>
-              )}
-              <FormHeading>
-                What do you want{" "}
-                <strong
-                  style={{ fontWeight: 600, textDecoration: "underline" }}
-                >
-                  @{username}
-                </strong>{" "}
-                to say?
-              </FormHeading>
-              <Spacer />
-              <Textarea
-                placeholder={"Type your tweet here."}
-                rows={5}
-                onChange={e => this.updateText(e.target.value)}
+        <Box>
+          <form
+            onSubmit={e => {
+              e.preventDefault();
+              this.createTweet();
+            }}
+          >
+            {this.createStatus === "error" && (
+              <div style={{ color: "red" }}>
+                Something went wrong creating your proposal 😕
+              </div>
+            )}
+            <FormHeading>
+              What do you want{" "}
+              <strong style={{ fontWeight: 600, textDecoration: "underline" }}>
+                @{username}
+              </strong>{" "}
+              to say?
+            </FormHeading>
+            <Spacer />
+            <Textarea
+              placeholder={"Type your tweet here."}
+              rows={5}
+              onChange={e => this.updateText(e.target.value)}
+            />
+            <Spacer />
+            <FormHeading>How much are you staking on this tweet?</FormHeading>
+            <Spacer size={0.5} />
+            <h4 style={{ fontWeight: 400, color: "#555" }}>
+              If your tweet isn't approved, you'll lose this money.
+            </h4>
+            <Spacer />
+            <InputGroup>
+              <Input
+                placeholder={"0.0"}
+                onChange={e => this.updateStake(e.target.value)}
               />
-              <Spacer />
-              <FormHeading>How much are you staking on this tweet?</FormHeading>
-              <Spacer size={0.5} />
-              <h4 style={{ fontWeight: 400, color: "#555" }}>
-                If your tweet isn't approved, you'll lose this money.
-              </h4>
-              <Spacer />
-              <InputGroup>
-                <Input
-                  placeholder={"0.0"}
-                  onChange={e => this.updateStake(e.target.value)}
-                />
-                <label>TWEETH</label>
-              </InputGroup>
-              <Spacer size={1.25} />
+              <label>TWEETH</label>
+            </InputGroup>
+            <Spacer size={1.25} />
+            {this.props.store.currentAddress ? (
               <Button type="submit" disabled={!this.tweetIsReady}>
                 Propose tweet for{" "}
                 <strong style={{ fontWeight: 600 }}>@{username}</strong>
               </Button>
-            </form>
-          </Box>
-        )}
+            ) : (
+              <Alert>
+                Please make sure you are connected to Ethereum and your wallet
+                is unlocked.
+              </Alert>
+            )}
+          </form>
+        </Box>
 
         <Spacer />
         <div style={{ textAlign: "center" }}>

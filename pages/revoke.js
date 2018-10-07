@@ -31,11 +31,12 @@ export default class Revoke extends React.Component {
       <AppLayout>
         <Box>
           <div style={{ textAlign: "center" }}>
+            <h1 style={{ fontSize: 60 }}>⛔</h1>
             <h2 style={{ fontWeight: 400 }}>Revoke access to your Twitter</h2>
           </div>
           <Spacer />
           <a href={`/auth/twitter`} style={{ textDecoration: "none" }}>
-            <Button>Revoke SayToshi access</Button>
+            <Button>Confirm your Twitter account</Button>
           </a>
         </Box>
       </AppLayout>

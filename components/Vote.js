@@ -14,7 +14,8 @@ import {
   Box,
   InputGroup,
   Input,
-  FormHeading
+  FormHeading,
+  Alert
 } from "../pages/tweet";
 import distanceInWords from "date-fns/distance_in_words";
 import Countdown from "react-countdown-now";
@@ -87,9 +88,9 @@ export default class Vote extends React.Component {
           <div>
             Voting ends in <Countdown date={tweet.votingEndsAt} />
           </div>
-          <a as={`/${username}/${tweet.id}`} href={`/viewTweet?tweet=${tweet.id}`} target="_blank">
-            Link ↗
-          </a>
+          <Link as={`/t/${tweet.uuid}`} href={`/viewTweet?uuid=${tweet.uuid}`}>
+            Share Link
+          </Link>
         </Flex>
         <Spacer size={0.5} />
         <Box>
@@ -97,9 +98,7 @@ export default class Vote extends React.Component {
             {tweet.text}
           </h3>
           <Divider padded color={"#dadada"} />
-          <FormHeading>
-            Vote amount
-          </FormHeading>
+          <FormHeading>Vote amount</FormHeading>
           <Spacer size={0.5} />
           <InputGroup>
             <Input
@@ -110,21 +109,28 @@ export default class Vote extends React.Component {
             <label>TWEETH</label>
           </InputGroup>
           <Spacer />
-          <Flex>
-            <ApproveButton
-              disabled={!this.isValid}
-              onClick={() => this.castVote(true)}
-            >
-              👍 Approve
-            </ApproveButton>
-            <Spacer inline size={0.5} />
-            <RejectButton
-              disabled={!this.isValid}
-              onClick={() => this.castVote(false)}
-            >
-              👎 Reject
-            </RejectButton>
-          </Flex>
+          {this.props.store.hasWeb3 ? (
+            <Flex>
+              <ApproveButton
+                disabled={!this.isValid}
+                onClick={() => this.castVote(true)}
+              >
+                👍 Approve
+              </ApproveButton>
+              <Spacer inline size={0.5} />
+              <RejectButton
+                disabled={!this.isValid}
+                onClick={() => this.castVote(false)}
+              >
+                👎 Reject
+              </RejectButton>
+            </Flex>
+          ) : (
+            <Alert>
+              Please make sure you are connected to Ethereum and your wallet is
+              unlocked.
+            </Alert>
+          )}
         </Box>
         <Spacer size={1.5} />
       </div>
