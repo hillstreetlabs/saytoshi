@@ -20,7 +20,7 @@ export default class BlockWatcher extends EventEmitter {
 
   async start() {
     const currentBlock = await this.web3.eth.getBlockNumber();
-    const startBlock = currentBlock - 10;
+    const startBlock = currentBlock - 30;
     this.stream = new Ethstream(this.web3.currentProvider, {
       fromBlockNumber: startBlock,
       onAddBlock: async block => {
@@ -34,12 +34,12 @@ export default class BlockWatcher extends EventEmitter {
 
   async checkBlockForLogs(block: Block) {
     const events = await this.contract.getPastEvents("allEvents", {
-      fromBlock: block.number,
-      toBlock: block.number
+      fromBlock: block.number - 1,
+      toBlock: block.number - 1
     });
     if (events.length <= 0) return;
 
-    const { timestamp } = await this.web3.eth.getBlock(block.number);
+    const { timestamp } = await this.web3.eth.getBlock(block.number - 1);
     for (let event of events) {
       if (event.event === "ProposalCreated") {
         const proposal = await this.contract.methods
@@ -47,14 +47,14 @@ export default class BlockWatcher extends EventEmitter {
           .call();
         const bonus = proposal[5]; // hacky
         this.emit("tweetProposed", {
-          uuid: event.returnValues.id,
+          uuid: event.returnValues.id.substring(2),
           timestamp: new Date(timestamp * 1000),
           stake: new BigNumber(bonus.toString())
         });
       }
       if (event.event === "VoteLogged") {
         this.emit("voteAdded", {
-          uuid: event.returnValues.id,
+          uuid: event.returnValues.id.substring(2),
           isYes: event.returnValues.yes,
           voter: event.returnValues.voter,
           timestamp: new Date(timestamp * 1000),

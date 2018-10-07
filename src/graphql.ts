@@ -38,6 +38,8 @@ const typeDefs = `
     status: TweetStatus
     tweeterId: String
     tweeter: Tweeter
+    proposedAt: Date
+    votingEndsAt: Date
   }
 
   type Tweeter {
@@ -96,7 +98,11 @@ const resolvers = [
       serialize: (date: Date) => date.getTime()
     }),
     Tweet: {
-      tweeter: async (tweet: TweetModel) => await Tweeter.findById(tweet.tweeterId)
+      tweeter: async (tweet: TweetModel) =>
+        await Tweeter.findById(tweet.tweeterId),
+      votingEndsAt: (tweet: TweetModel) =>
+        tweet.proposedAt &&
+        new Date(tweet.proposedAt.getTime() + (global as any).VOTING_TIME)
     },
     Tweeter: { id: (tweeter: TweeterModel) => tweeter._id.toString() }
   }

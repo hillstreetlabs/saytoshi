@@ -25,6 +25,7 @@ export default class Queue extends React.Component {
           uuid
           text
           proposedAt
+          votingEndsAt
           tweeter {
             handle
           }

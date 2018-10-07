@@ -35,10 +35,13 @@ export default async function createApp() {
     stake: BigNumber;
     timestamp: Date;
   }) {
-    await Tweet.updateOne(
+    console.log(arguments);
+    const tweet = await Tweet.updateOne(
       { uuid },
       { status: "proposed", stake: stake.toString(), proposedAt: timestamp }
     );
+
+    console.log(tweet);
     // Set timeout for scheduling 😎
     const expirationTime = timestamp.getTime() + 10 * 1000 * 60;
     const remainingTime = expirationTime - Date.now() + 1000;
