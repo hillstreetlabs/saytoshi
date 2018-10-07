@@ -3,6 +3,7 @@ import styled from "react-emotion";
 import { withRouter } from "next/router";
 import Link from "next/link";
 import Spacer from "./Spacer";
+import { utils } from "ethers";
 
 const HeaderContainer = styled("div")`
   width: 100%;
@@ -32,7 +33,11 @@ export default class Header extends React.Component {
           </Link>
           <div>
             <div>{this.props.store.currentAddress}</div>
-            <div>Balance TODO</div>
+            {this.props.store.tokenBalance && (
+              <div>
+                Balance {utils.formatEther(this.props.store.tokenBalance)}
+              </div>
+            )}
           </div>
         </HeaderContainer>
         <Spacer />

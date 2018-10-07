@@ -1,9 +1,13 @@
 import { observable } from "mobx";
-import { providers } from "ethers";
+import { providers, Contract } from "ethers";
+const TweEthVoter = require("../abis/TweEthVoter");
+const ERC20Mintable = require("../abis/ERC20Mintable");
 
 export default class Store {
   @observable currentAddress = undefined;
   @observable hasErrorEnabling = false;
+  @observable isUnlocked = undefined;
+  @observable tokenBalance = undefined;
 
   async start() {
     let web3 = null;
@@ -19,8 +23,24 @@ export default class Store {
       web3 = window.web3.currentProvider;
     }
     this.provider = new providers.Web3Provider(web3);
+    this.voterContract = new Contract(
+      process.env.VOTER_ADDRESS,
+      TweEthVoter,
+      this.provider.getSigner()
+    );
+    this.tokenContract = new Contract(
+      process.env.TWEETH_ADDRESS,
+      ERC20Mintable,
+      this.provider.getSigner()
+    );
+
     this.currentAddress = (await this.provider.listAccounts())[0];
-    await this.getBalances();
+    const allowance = await this.tokenContract.allowance(
+      this.currentAddress,
+      process.env.VOTER_ADDRESS
+    );
+    this.isUnlocked = !allowance.isZero();
+    this.getBalances();
   }
 
   async refresh() {
@@ -31,10 +51,10 @@ export default class Store {
 
   async getBalances() {
     if (!this.hasWeb3) return;
-    // TODO: fetch balances
+    this.tokenBalance = await this.tokenContract.balanceOf(this.currentAddress);
   }
 
   get hasWeb3() {
-    return !!this.currentAddress;
+    return !!this.currentAddress && typeof this.isUnlocked !== undefined;
   }
 }

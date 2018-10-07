@@ -1,6 +1,6 @@
 import { makeExecutableSchema } from "graphql-tools";
 import { GraphQLScalarType } from "graphql";
-import { Tweet, Tweeter, TweeterModel } from "./models";
+import { Tweet, TweetModel, Tweeter, TweeterModel } from "./models";
 import createTweet from "./mutations/createTweet";
 
 const typeDefs = `
@@ -9,6 +9,9 @@ const typeDefs = `
   type Query {
     pendingTweets: [Tweet]
     proposedTweets: [Tweet]
+    acceptedTweets: [Tweet]
+    rejectedTweets: [Tweet]
+    tweetedTweets: [Tweet]
     tweeters: [Tweeter]
   }
 
@@ -34,6 +37,7 @@ const typeDefs = `
     text: String
     status: TweetStatus
     tweeterId: String
+    tweeter: Tweeter
   }
 
   type Tweeter {
@@ -45,12 +49,25 @@ const typeDefs = `
 const resolvers = [
   {
     Query: {
+      // Fuck it, who needs arguments
       pendingTweets: async () => {
         const tweets = await Tweet.find({ status: "pending" });
         return tweets;
       },
       proposedTweets: async () => {
         const tweets = await Tweet.find({ status: "proposed" });
+        return tweets;
+      },
+      acceptedTweets: async () => {
+        const tweets = await Tweet.find({ status: "accepted" });
+        return tweets;
+      },
+      rejectedTweets: async () => {
+        const tweets = await Tweet.find({ status: "rejected" });
+        return tweets;
+      },
+      tweetedTweets: async () => {
+        const tweets = await Tweet.find({ status: "tweeted" });
         return tweets;
       },
       tweeters: async () => {
@@ -78,7 +95,9 @@ const resolvers = [
       name: "Date",
       serialize: (date: Date) => date.getTime()
     }),
-    Tweet: {},
+    Tweet: {
+      tweeter: async (tweet: TweetModel) => await Tweeter.findById(tweet.tweeterId)
+    },
     Tweeter: { id: (tweeter: TweeterModel) => tweeter._id.toString() }
   }
 ];

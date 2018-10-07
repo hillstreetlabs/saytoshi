@@ -15,6 +15,7 @@ import next = require("next");
 import passport = require("passport");
 import airdropTokens from "./mutations/airdropTokens";
 import closeTweetVoting from "./mutations/closeTweetVoting";
+import closeProposedTweets from "./mutations/closeProposedTweets";
 import bodyParser = require("body-parser");
 var GitHubStrategy = require("passport-github").Strategy;
 var TwitterStrategy = require("passport-twitter").Strategy;
@@ -36,7 +37,7 @@ export default async function createApp() {
   }) {
     await Tweet.updateOne(
       { uuid },
-      { status: "proposed", stake: stake.toString() }
+      { status: "proposed", stake: stake.toString(), proposedAt: timestamp }
     );
     // Set timeout for scheduling 😎
     const expirationTime = timestamp.getTime() + 10 * 1000 * 60;
@@ -90,6 +91,15 @@ export default async function createApp() {
         process.env.NODE_ENV !== "production" ? error.stack.split("\n") : null
     };
   };
+  app.use("/graphql", (req, _res, next) => {
+    try {
+      console.log("Request", {
+        query: req.body.query.match(/[\s]*(query|mutation) ([\w]+)/)[2],
+        keys: req.body.variables && Object.keys(req.body.variables)
+      });
+    } catch (e) {}
+    next();
+  });
   const schema = getSchema();
   app.use(
     "/graphql",
@@ -227,5 +237,8 @@ export default async function createApp() {
 
   await mongoose.connect(process.env.MONGODB_URL);
   const server = createServer(app);
+
+  setInterval(() => closeProposedTweets(web3), 20000); // TODO: Every ten minutes
+
   return { server, watcher, web3 };
 }
