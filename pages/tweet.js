@@ -93,10 +93,10 @@ export default class ProposeTweet extends React.Component {
   @observable text = "";
   @observable stake = "";
   @observable uuid = undefined;
-  @observable createStatus = null; // null, "error", "saving", "signing", "confirming"
+  @observable createStatus = "none"; // null, error, saving, signing
 
   async createTweet() {
-    this.createStatus = "saving";
+    this.createStatus = "signing";
     let uuid;
     try {
       const { username } = this.props.router.query;
@@ -139,6 +139,7 @@ export default class ProposeTweet extends React.Component {
         "0x" + uuid,
         stake
       );
+      this.createStatus = "saving";
       this.props.router.push(`/viewTweet?uuid=${uuid}`, `/t/${uuid}`);
     } catch (e) {
       console.log(e);
@@ -208,9 +209,23 @@ export default class ProposeTweet extends React.Component {
             </InputGroup>
             <Spacer size={1.25} />
             {this.props.store.currentAddress ? (
-              <Button type="submit" disabled={!this.tweetIsReady}>
-                Propose tweet for{" "}
-                <strong style={{ fontWeight: 600 }}>@{username}</strong>
+              <Button
+                type="submit"
+                disabled={!this.tweetIsReady || this.tweetStatus !== "none"}
+              >
+                {this.createStatus === "signing" && (
+                  <span>Check your wallet for details</span>
+                )}
+                {this.createStatus === "saving" && (
+                  <span>Proposing your tweet...</span>
+                )}
+                {this.createStatus === "error" ||
+                  (this.createStatus === "none" && (
+                    <span>
+                      Propose tweet for{" "}
+                      <strong style={{ fontWeight: 600 }}>@{username}</strong>
+                    </span>
+                  ))}
               </Button>
             ) : (
               <Alert>
