@@ -10,6 +10,6 @@
     "GITHUB_CLIENT_SECRET": "@saytoshi-github-client-secret",
     "TWITTER_CONSUMER_KEY": "@saytoshi-twitter-consumer-key",
     "TWITTER_CONSUMER_SECRET": "@saytoshi-twitter-consumer-secret",
-    "MNEMONIC": "@saytoshi-mnemonic"
+    "MNEMONIC": "@saytoshi-mainnet-mnemonic"
   }
 }
