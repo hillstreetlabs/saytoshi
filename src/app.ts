@@ -53,7 +53,6 @@ export default async function createApp() {
     stake: BigNumber;
     timestamp: Date;
   }) {
-    console.log(arguments);
     const tweet = await Tweet.updateOne(
       { uuid },
       { status: "proposed", stake: stake.toString(), proposedAt: timestamp }
@@ -193,11 +192,9 @@ export default async function createApp() {
 
   // Twitter oauth
   passport.serializeUser(function(user, done) {
-    console.log("Serializing", user);
     done(null, user);
   });
   passport.deserializeUser(function(user, done) {
-    console.log("Deserializing", user);
     done(null, user);
   });
   passport.use(
@@ -224,7 +221,7 @@ export default async function createApp() {
           "_200x200"
         );
         if (currentTweeter) {
-          await Tweeter.update(
+          await Tweeter.updateOne(
             { _id: currentTweeter._id },
             {
               token,
@@ -251,15 +248,6 @@ export default async function createApp() {
     )
   );
   app.get(
-    "/auth/twitter/:address",
-    (req, _res, next) => {
-      const address = req.params.address.toLowerCase();
-      req.session.address = address;
-      next();
-    },
-    passport.authenticate("twitter")
-  );
-  app.get(
     "/auth/twitter/callback",
     passport.authenticate("twitter", {
       failureRedirect: "/connect"
@@ -268,6 +256,15 @@ export default async function createApp() {
       // Successful authentication, redirect home.
       res.redirect("/?createdTweeter");
     }
+  );
+  app.get(
+    "/auth/twitter/:address",
+    (req, _res, next) => {
+      const address = req.params.address.toLowerCase();
+      req.session.address = address;
+      next();
+    },
+    passport.authenticate("twitter")
   );
 
   // Custom next routes
