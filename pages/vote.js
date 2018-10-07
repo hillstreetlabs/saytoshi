@@ -1,4 +1,5 @@
 import { observer, inject } from "mobx-react";
+import { observable } from "mobx";
 import Link from "next/link";
 import styled from "react-emotion";
 import { withRouter } from "next/router";
@@ -7,10 +8,13 @@ import Wrapper from "../components/Wrapper";
 import Subheader from "../components/Subheader";
 import AppLayout from "../components/AppLayout";
 import Spacer from "../components/Spacer";
+import Vote from "../components/Vote";
 import Divider from "../components/Divider";
 import { basePadding, Box, InputGroup, Input, FormHeading } from "./tweet";
 import distanceInWords from "date-fns/distance_in_words";
 import Countdown from "react-countdown-now";
+import graphqlFetch from "../web/graphqlFetch";
+import { utils } from "ethers";
 
 const Flex = styled("div")`
   display: flex;
@@ -26,6 +30,11 @@ const Button = styled("button")`
   padding: ${basePadding * 1.5}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
 `;
 
 const ApproveButton = styled(Button)`
@@ -39,23 +48,72 @@ const RejectButton = styled(Button)`
 @inject("store")
 @withRouter
 @observer
-export default class Vote extends React.Component {
-  get contests() {
-    // TODO
-    return [
-      {
-        id: 1,
-        time: new Date(),
-        text:
-          "Just want to that the Shortseller Enrichment Commission is doing incredible work. And the name change is so on point!"
-      },
-      {
-        id: 2,
-        time: new Date(),
-        text:
-          "People sometimes forget that a company is just a group of people gathered together to make products. So long as it makes great products, it will have great value."
-      }
-    ];
+export default class VotePage extends React.Component {
+  @observable fetchedTweets = undefined;
+  voteAmounts = observable.map({});
+  didVote = observable.map({});
+
+  static async getTweets() {
+    const tweetsQuery = `
+      query AcceptedTweets {
+        proposedTweets {
+          uuid
+          text
+          proposedAt
+          votingEndsAt
+          tweeter {
+            handle
+          }
+        }
+      }`;
+    const { proposedTweets } = await graphqlFetch(tweetsQuery);
+    return proposedTweets;
+  }
+
+  static async getInitialProps() {
+    const tweets = await VotePage.getTweets();
+    return { tweets };
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(() => this.refresh(), 10000);
+  }
+
+  componentWillUnmount() {
+    if (this.interval) clearTimeout(this.interval);
+  }
+
+  async refresh() {
+    const tweets = await VotePage.getTweets();
+    this.fetchedTweets = tweets;
+  }
+
+  get tweets() {
+    if (this.fetchedTweets) return this.fetchedTweets;
+    return this.props.tweets;
+  }
+
+  isValid(uuid) {
+    return (
+      this.voteAmounts.has(uuid) &&
+      this.voteAmounts.get(uuid).match(/^[0-9.]+$/)
+    );
+  }
+
+  async castVote(uuid, isYes) {
+    if (!this.isValid(uuid)) return;
+    const amount = utils.parseEther(this.voteAmounts.get(uuid));
+    try {
+      const result = await this.props.store.voterContract.vote(
+        "0x" + uuid,
+        amount,
+        isYes
+      );
+      this.didVote.set(uuid, true);
+    } catch (e) {
+      console.error(e);
+      this.error = "Something went wrong voting on the tweet 😕";
+    }
   }
 
   render() {
@@ -65,40 +123,7 @@ export default class Vote extends React.Component {
         <Spacer />
         <Subheader username={username} selected="vote" />
         <Spacer size={1.5} />
-        {this.contests.map((contest, i) => (
-          <div key={i}>
-            <Flex>
-              <div>
-                Voting ends in <Countdown date={contest.time} />
-              </div>
-              <a href={`/${username}/${contest.id}`} target="_blank">
-                Link ↗
-              </a>
-            </Flex>
-            <Spacer size={0.5} />
-            <Box>
-              <h3 style={{ fontWeight: 400, lineHeight: 1.4, fontSize: 20 }}>
-                {contest.text}
-              </h3>
-              <Divider padded color={"#dadada"} />
-              <FormHeading>
-                Vote amount{" "}
-                <small style={{ fontWeight: 400 }}>20 TWEETH available</small>
-              </FormHeading>
-              <Spacer size={0.5} />
-              <InputGroup>
-                <Input />
-                <label>TWEETH</label>
-              </InputGroup>
-              <Spacer />
-              <Flex>
-                <ApproveButton>Approve</ApproveButton>
-                <RejectButton>Reject</RejectButton>
-              </Flex>
-            </Box>
-            <Spacer size={1.5} />
-          </div>
-        ))}
+        {this.tweets.map((tweet, i) => <Vote key={tweet.uuid} tweet={tweet} />)}
       </AppLayout>
     );
   }

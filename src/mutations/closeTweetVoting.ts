@@ -12,7 +12,7 @@ export default async function closeTweetVoting(web3: Web3, uuid: string) {
     TweEthVoter,
     process.env.VOTER_ADDRESS
   );
-  const proposal = await contract.methods.proposalsByUuid(uuid).call();
+  const proposal = await contract.methods.uuidToProposals("0x" + uuid).call();
   console.log(proposal);
 
   // TODO: check vote result
