@@ -23,6 +23,7 @@ export type TweetModel = mongoose.Document & {
   tweeterId: string;
   tweetId: string;
   yesStake: number;
+  proposedAt: Date;
 };
 
 const tweetSchema = new mongoose.Schema(

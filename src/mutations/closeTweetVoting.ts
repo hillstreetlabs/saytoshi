@@ -5,6 +5,7 @@ const TweEthVoter = require("../../abis/TweEthVoter");
 export default async function closeTweetVoting(web3: Web3, uuid: string) {
   let tweet = await Tweet.findOne({ uuid });
   if (tweet.status !== "proposed") return tweet; // already closed
+  console.log("Closing voting for " + tweet.uuid);
 
   // TODO: send mint transaction
   const contract = new web3.eth.Contract(
