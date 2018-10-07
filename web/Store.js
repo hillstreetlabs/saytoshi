@@ -74,7 +74,7 @@ export default class Store {
     if (!this.hasWeb3) return;
     const totalSupply = await this.tokenContract.totalSupply();
     this.quorum = new BigNumber(totalSupply.toString()).div(
-      new BigNumber("20")
+      new BigNumber("100")
     );
     this.tokenBalance = await this.tokenContract.balanceOf(this.currentAddress);
   }
