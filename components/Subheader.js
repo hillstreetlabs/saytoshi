@@ -5,18 +5,22 @@ import { withRouter } from "next/router";
 import Spacer from "./Spacer";
 
 const SubheaderLink = styled("a")`
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 10px;
+  transition: 0.15s;
 
   &:hover {
-    border-bottom: 2px solid;
+    background-color: #dadada;
   }
 
   ${props =>
     props.selected &&
     `
-    border-bottom: 2px solid #822DFF;
-    color: #822DFF;
+    background-color: #822DFF;
+    color: white;
+    pointer-events: none;
   `};
 `;
 
@@ -28,16 +32,16 @@ export default class Subheader extends React.Component {
     return (
       <div style={{ textAlign: "center" }}>
         <h1>@{username}</h1>
-        <Spacer size={0.5} />
+        <Spacer />
         <div>
           <Link as={`/${username}`} href={`/tweet?username=${username}`}>
             <SubheaderLink selected={selected === "tweet"}>Tweet</SubheaderLink>
           </Link>
-          <Spacer inline />
+          <Spacer inline size={0.25} />
           <Link as={`/${username}/queue`} href={`/queue?username=${username}`}>
             <SubheaderLink selected={selected === "queue"}>Queue</SubheaderLink>
           </Link>
-          <Spacer inline />
+          <Spacer inline size={0.25} />
           <Link as={`/${username}/vote`} href={`/vote?username=${username}`}>
             <SubheaderLink selected={selected === "vote"}>Voting</SubheaderLink>
           </Link>
