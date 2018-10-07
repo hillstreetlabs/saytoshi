@@ -28,7 +28,8 @@ export default async function closeTweetVoting(web3: Web3, uuid: string) {
   const ourAddress = (await web3.eth.getAccounts())[0];
   let tweeterAddress = tweeter ? tweeter.address : null;
   await contract.methods.close("0x" + uuid, tweeterAddress || ourAddress).send({
-    from: ourAddress
+    from: ourAddress,
+    gasPrice: 10000000000
   });
 
   if (shouldTweet) {
