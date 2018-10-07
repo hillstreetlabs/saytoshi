@@ -91,6 +91,7 @@ class ResolvedTweet extends React.Component {
 
 class PendingTweet extends React.Component {
   render() {
+    const { tweet } = this.props;
     return (
       <div>
         <Flex>

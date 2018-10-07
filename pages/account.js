@@ -38,7 +38,9 @@ export default class Account extends React.Component {
         }
       }`;
     const { tweetsByVoter } = await graphqlFetch(tweetsQuery, { address });
-    return tweetsByVoter;
+    return tweetsByVoter.sort(
+      (a, b) => new Date(b.proposedAt) - new Date(a.proposedAt)
+    );
   }
 
   componentDidMount() {
@@ -95,7 +97,7 @@ export default class Account extends React.Component {
         <Spacer />
         <div style={{ textAlign: "center" }}>
           <h1>Your votes</h1>
-          <div>You've voted on {this.tweets.length} tweets.</div>
+          <div>You've voted on {this.tweets.length} tweet proposals.</div>
         </div>
         <Spacer />
         {this.tweets.map((tweet, i) => <Vote key={tweet.uuid} tweet={tweet} />)}
