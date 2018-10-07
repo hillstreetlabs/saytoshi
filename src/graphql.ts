@@ -14,6 +14,7 @@ const typeDefs = `
     tweetedTweets: [Tweet]
     tweet(uuid: ID!): Tweet
     tweeters: [Tweeter]
+    tweetsByVoter(address: String): [Tweet]
   }
 
   type Mutation {
@@ -94,6 +95,10 @@ const resolvers = [
       tweeters: async () => {
         const tweeters = await Tweeter.find();
         return tweeters;
+      },
+      tweetsByVoter: async (_: any, args: { address: string }) => {
+        const tweets = await Tweet.find({ "votes.voter": args.address });
+        return tweets;
       }
     },
     Mutation: {

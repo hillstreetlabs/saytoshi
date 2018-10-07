@@ -298,6 +298,10 @@ export default async function createApp() {
     return handle(req, res);
   });
 
+  app.get("/account", (req, res) => {
+    return handle(req, res);
+  });
+
   app.get("/t/:uuid", (req, res) => {
     const actualPage = "/viewTweet";
     const queryParams = { uuid: req.params.uuid };

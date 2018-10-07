@@ -21,6 +21,7 @@ import distanceInWords from "date-fns/distance_in_words";
 import Countdown from "react-countdown-now";
 import graphqlFetch from "../web/graphqlFetch";
 import { utils } from "ethers";
+import { now } from "mobx-utils";
 
 const Flex = styled("div")`
   display: flex;
@@ -50,6 +51,65 @@ const ApproveButton = styled(Button)`
 const RejectButton = styled(Button)`
   background-color: #a71de8;
 `;
+
+class CreatingTweet extends React.Component {
+  render() {
+    const { tweet } = this.props;
+    return (
+      <div>
+        <Box style={{ textAlign: "center" }}>
+          This proposal is being created. Hang tight for a moment!
+        </Box>
+        <Spacer size={1.5} />
+      </div>
+    );
+  }
+}
+
+class ResolvedTweet extends React.Component {
+  render() {
+    const { tweet } = this.props;
+    return (
+      <div>
+        <Flex>
+          <div>
+            Voting ended {distanceInWords(now(), tweet.votingEndsAt)} ago
+          </div>
+          <Link as={`/t/${tweet.uuid}`} href={`/viewTweet?uuid=${tweet.uuid}`}>
+            Direct Link
+          </Link>
+        </Flex>
+        <Spacer size={0.5} />
+        <Box style={{ textAlign: "center" }}>
+          This vote has resolved. Redeem interface coming soon.
+        </Box>
+        <Spacer size={1.5} />
+      </div>
+    );
+  }
+}
+
+class PendingTweet extends React.Component {
+  render() {
+    return (
+      <div>
+        <Flex>
+          <div>
+            Voting ended {distanceInWords(now(), tweet.votingEndsAt)} ago
+          </div>
+          <Link as={`/t/${tweet.uuid}`} href={`/viewTweet?uuid=${tweet.uuid}`}>
+            Direct Link
+          </Link>
+        </Flex>
+        <Spacer size={0.5} />
+        <Box style={{ textAlign: "center" }}>
+          Voting has ended. Results being tallied.
+        </Box>
+        <Spacer size={1.5} />
+      </div>
+    );
+  }
+}
 
 @inject("store")
 @withRouter
@@ -82,6 +142,12 @@ export default class Vote extends React.Component {
   render() {
     const { username } = this.props.router.query;
     const { tweet } = this.props;
+    if (!tweet.votingEndsAt) return <CreatingTweet tweet={tweet} />;
+    const votingEndsAt = new Date(tweet.votingEndsAt).getTime();
+    const rightNow = now();
+    if (rightNow - votingEndsAt > 120000)
+      return <ResolvedTweet tweet={tweet} />;
+    if (rightNow - votingEndsAt > 0) return <PendingTweet tweet={tweet} />;
     return (
       <div>
         <Flex>
@@ -89,7 +155,7 @@ export default class Vote extends React.Component {
             Voting ends in <Countdown date={tweet.votingEndsAt} />
           </div>
           <Link as={`/t/${tweet.uuid}`} href={`/viewTweet?uuid=${tweet.uuid}`}>
-            Share Link
+            Direct Link
           </Link>
         </Flex>
         <Spacer size={0.5} />
