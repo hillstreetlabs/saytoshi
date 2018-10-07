@@ -1,3 +1,4 @@
+import { inject, observer } from "mobx-react";
 import styled from "react-emotion";
 import Wrapper from "./Wrapper";
 import Header from "./Header";
@@ -26,6 +27,8 @@ const Container = styled("div")`
   width: 100%;
 `;
 
+@inject("store")
+@observer
 export default class AppLayout extends React.Component {
   render() {
     return (

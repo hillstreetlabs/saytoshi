@@ -23,6 +23,7 @@ export default class Store {
     } else if (window.web3) {
       web3 = window.web3.currentProvider;
     }
+    if (!web3) return null;
     this.provider = new providers.Web3Provider(web3);
     this.voterContract = new Contract(
       process.env.VOTER_ADDRESS,
@@ -42,7 +43,7 @@ export default class Store {
     );
     this.isUnlocked = !allowance.isZero();
     this.getBalances();
-    this.interval = setInterval(() => this.refresh(), 4000);
+    this.interval = setInterval(() => this.refresh(), 2000);
   }
 
   stop() {

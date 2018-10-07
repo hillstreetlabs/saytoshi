@@ -76,6 +76,16 @@ export const FormHeading = styled("h2")`
   font-weight: 500;
 `;
 
+export const Alert = styled("div")`
+  padding: 20px;
+  text-align: center;
+  border: 2px solid #f420ff;
+  border-radius: 5px;
+  color: #f420ff;
+  font-size: 18px;
+  background-color: rgba(244, 32, 255, 0.1);
+`;
+
 @inject("store")
 @withRouter
 @observer
@@ -209,10 +219,17 @@ export default class ProposeTweet extends React.Component {
                 <label>TWEETH</label>
               </InputGroup>
               <Spacer size={1.25} />
-              <Button type="submit" disabled={!this.tweetIsReady}>
-                Propose tweet for{" "}
-                <strong style={{ fontWeight: 600 }}>@{username}</strong>
-              </Button>
+              {this.props.store.currentAddress ? (
+                <Button type="submit" disabled={!this.tweetIsReady}>
+                  Propose tweet for{" "}
+                  <strong style={{ fontWeight: 600 }}>@{username}</strong>
+                </Button>
+              ) : (
+                <Alert>
+                  Please make sure you are connected to Ethereum and your wallet
+                  is unlocked.
+                </Alert>
+              )}
             </form>
           </Box>
         )}

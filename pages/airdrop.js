@@ -7,7 +7,7 @@ import AppLayout from "../components/AppLayout";
 import Spacer from "../components/Spacer";
 import Divider from "../components/Divider";
 import graphqlFetch from "../web/graphqlFetch";
-import { Box, basePadding } from "./tweet";
+import { Box, Alert, basePadding } from "./tweet";
 import first from "lodash/first";
 
 const Button = styled("button")`
@@ -93,13 +93,18 @@ export default class Airdrop extends React.Component {
             </h3>
           </div>
           <Spacer />
-          {this.props.store.currentAddress && (
+          {this.props.store.hasWeb3 ? (
             <a
               href={`/airdrop/to/${this.props.store.currentAddress}`}
               style={{ textDecoration: "none" }}
             >
               <Button>Authenticate with Github</Button>
             </a>
+          ) : (
+            <Alert>
+              Please make sure you are connected to Ethereum and your wallet is
+              unlocked.
+            </Alert>
           )}
         </Box>
       </AppLayout>

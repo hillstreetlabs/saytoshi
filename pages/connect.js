@@ -7,7 +7,7 @@ import AppLayout from "../components/AppLayout";
 import Spacer from "../components/Spacer";
 import Divider from "../components/Divider";
 import graphqlFetch from "../web/graphqlFetch";
-import { Box, basePadding } from "./tweet";
+import { Box, Alert, basePadding } from "./tweet";
 import first from "lodash/first";
 
 const Button = styled("button")`
@@ -40,10 +40,15 @@ export default class Revoke extends React.Component {
             </h3>
           </div>
           <Spacer size={1.5} />
-          {this.props.store.currentAddress && (
+          {this.props.store.hasWeb3 ? (
             <a href={`/auth/twitter`} style={{ textDecoration: "none" }}>
               <Button>Connect Twitter</Button>
             </a>
+          ) : (
+            <Alert>
+              Please make sure you are connected to Ethereum and your wallet is
+              unlocked.
+            </Alert>
           )}
         </Box>
       </AppLayout>
