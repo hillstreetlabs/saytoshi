@@ -1,5 +1,5 @@
 import { observer, inject } from "mobx-react";
-import { observable } from "mobx";
+import { action, observable, computed } from "mobx";
 import Link from "next/link";
 import { withRouter } from "next/router";
 import styled from "react-emotion";
@@ -63,6 +63,11 @@ const Button = styled("button")`
   padding: ${basePadding * 2}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
+
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
 `;
 
 export const FormHeading = styled("h2")`
@@ -75,10 +80,13 @@ export const FormHeading = styled("h2")`
 @observer
 export default class ProposeTweet extends React.Component {
   @observable text = "";
-  @observable error = undefined;
+  @observable stake;
   @observable uuid = undefined;
+  @observable createStatus = null; // null, "error", "saving", "signing", "confirming"
 
   async createTweet() {
+    this.createStatus = "saving";
+    let uuid;
     try {
       const { username } = this.props.router.query;
       // Get uuid from server
@@ -108,14 +116,32 @@ export default class ProposeTweet extends React.Component {
           text: this.text
         }
       });
-      const uuid = createTweet.uuid;
-
+      uuid = createTweet.uuid;
+    } catch (e) {
+      console.error(e);
+      this.createStatus = "error";
+    }
+    try {
       const result = await this.props.store.voterContract.propose("0x" + uuid);
       this.uuid = uuid;
     } catch (e) {
-      console.error(e);
-      this.error = "Something went wrong proposing your tweet 😕";
+      console.log(e);
     }
+  }
+
+  @action
+  updateText(newText) {
+    this.text = newText;
+  }
+
+  @action
+  updateStake(newStake) {
+    this.stake = newStake;
+  }
+
+  @computed
+  get tweetIsReady() {
+    return this.text && parseFloat(this.stake) > 0;
   }
 
   render() {
@@ -142,7 +168,11 @@ export default class ProposeTweet extends React.Component {
                 this.createTweet();
               }}
             >
-              {this.error && <div style={{ color: "red" }}>{this.error}</div>}
+              {this.createStatus === "error" && (
+                <div style={{ color: "red" }}>
+                  Something went wrong creating your proposal 😕
+                </div>
+              )}
               <FormHeading>
                 What do you want{" "}
                 <strong
@@ -153,7 +183,11 @@ export default class ProposeTweet extends React.Component {
                 to say?
               </FormHeading>
               <Spacer />
-              <Textarea placeholder={"Type your tweet here."} rows={5} />
+              <Textarea
+                placeholder={"Type your tweet here."}
+                rows={5}
+                onChange={e => this.updateText(e.target.value)}
+              />
               <Spacer />
               <FormHeading>How much are you staking on this tweet?</FormHeading>
               <Spacer size={0.5} />
@@ -162,11 +196,14 @@ export default class ProposeTweet extends React.Component {
               </h4>
               <Spacer />
               <InputGroup>
-                <Input placeholder={"0.0"} />
+                <Input
+                  placeholder={"0.0"}
+                  onChange={e => this.updateStake(e.target.value)}
+                />
                 <label>TWEETH</label>
               </InputGroup>
               <Spacer size={1.25} />
-              <Button type="submit">
+              <Button type="submit" disabled={!this.tweetIsReady}>
                 Propose tweet for{" "}
                 <strong style={{ fontWeight: 600 }}>@{username}</strong>
               </Button>
