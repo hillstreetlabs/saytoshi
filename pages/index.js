@@ -36,7 +36,7 @@ export default class Index extends React.Component {
           </h3>
         </Hero>
         <Spacer size={2} />
-        <TweetLink username="elonmusk">Tweet for @elonmusk</TweetLink>
+        <TweetLink username="SayToshiBot">Tweet for @SayToshiBot</TweetLink>
         <Spacer size={3} />
       </AppLayout>
     );
