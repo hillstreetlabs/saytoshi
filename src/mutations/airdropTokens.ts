@@ -10,7 +10,6 @@ export default async function airdropTokens(
   githubUsername: string,
   address: string
 ) {
-  // TODO: send mint transaction
   const contract = new web3.eth.Contract(
     ERC20Mintable,
     process.env.TWEETH_ADDRESS

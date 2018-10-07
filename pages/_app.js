@@ -23,6 +23,10 @@ export default class MyApp extends App {
     window.store = this.store;
   }
 
+  componentWillUnmount() {
+    this.store.stop();
+  }
+
   render() {
     const { Component, pageProps } = this.props;
     return (

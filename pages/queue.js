@@ -24,14 +24,18 @@ export default class Queue extends React.Component {
         acceptedTweets {
           uuid
           text
+          yesStake
+          totalStake
           proposedAt
           votingEndsAt
+          tweetAt
           tweeter {
             handle
           }
         }
       }`;
     const { acceptedTweets } = await graphqlFetch(tweetsQuery);
+    acceptedTweets.sort((a, b) => b.yesStake - a.yesStake);
     return acceptedTweets;
   }
 
@@ -67,7 +71,7 @@ export default class Queue extends React.Component {
         <Spacer size={1.5} />
         {this.tweets.map((tweet, i) => (
           <div key={i}>
-            🚀 in <Countdown date={tweet.time} />
+            🚀 in <Countdown date={tweet.tweetAt} />
             <Spacer size={0.25} />
             <Box>
               <h3 style={{ fontWeight: 400, lineHeight: 1.4, fontSize: 20 }}>

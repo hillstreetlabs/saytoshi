@@ -1,5 +1,5 @@
 import { Tweet } from "../models";
-// import sendTweet from "./sendTweet";
+import sendTweet from "./sendTweet";
 
 export default async function postTopTweet() {
   const acceptedTweets = await Tweet.find({ status: "accepted" });
@@ -7,7 +7,9 @@ export default async function postTopTweet() {
 
   const topTweet = acceptedTweets[0];
 
+  console.log("Top tweet", topTweet);
+
   if (!topTweet) return;
 
-  // await sendTweet(topTweet.uuid);
+  await sendTweet(topTweet.uuid);
 }

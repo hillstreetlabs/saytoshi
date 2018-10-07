@@ -6,6 +6,7 @@ export type TweeterModel = mongoose.Document & {
   tokenSecret: string;
   photo: string;
   followerCount: number;
+  address: string;
 };
 
 const tweeterSchema = new mongoose.Schema({

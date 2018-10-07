@@ -23,6 +23,7 @@ export type TweetModel = mongoose.Document & {
   tweeterId: string;
   tweetId: string;
   yesStake: number;
+  totalStake: number;
   proposedAt: Date;
 };
 
@@ -36,7 +37,8 @@ const tweetSchema = new mongoose.Schema(
     stake: String,
     tweetId: String,
     votes: [{ voter: String, timestamp: Date, isYes: Boolean, stake: String }],
-    yesStake: Number
+    yesStake: Number,
+    totalStake: Number
   },
   { timestamps: true }
 );

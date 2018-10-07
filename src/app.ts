@@ -31,6 +31,19 @@ export default async function createApp() {
 
   const watcher = new BlockWatcher(web3);
 
+  // Hacky "scheduled jobs" -- would ideally be done with cron
+  setInterval(() => closeProposedTweets(web3), 20000); // TODO: Every ten minutes
+
+  // This is a super hacky way of predictably scheduling things with setInterval
+  const timeBetweenTweets = 120000;
+  let nextTweetTime = Date.now() + timeBetweenTweets;
+  const getQueuedTweetTime = (queuePosition: number) =>
+    new Date(nextTweetTime + timeBetweenTweets * queuePosition);
+  setInterval(() => {
+    postTopTweet();
+    nextTweetTime = Date.now() + timeBetweenTweets;
+  }, timeBetweenTweets);
+
   async function handleTweetProposed({
     uuid,
     stake,
@@ -49,7 +62,7 @@ export default async function createApp() {
     console.log(tweet);
     // Set timeout for scheduling 😎
     const expirationTime = timestamp.getTime() + 10 * 1000 * 60;
-    const remainingTime = expirationTime - Date.now() + 1000;
+    const remainingTime = expirationTime - Date.now() + 5000; // 5 seconds extra
     console.log("Tweet proposed, will close voting in 10 minutes");
     setTimeout(() => closeTweetVoting(web3, uuid), remainingTime);
   }
@@ -114,7 +127,7 @@ export default async function createApp() {
     graphQLHttp(req => ({
       schema,
       graphiql: true,
-      context: { req, watcher },
+      context: { req, watcher, getQueuedTweetTime },
       formatError
     }))
   );
@@ -184,9 +197,16 @@ export default async function createApp() {
       {
         consumerKey: process.env.TWITTER_CONSUMER_KEY,
         consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
-        callbackURL: `${process.env.URL}/auth/twitter/callback`
+        callbackURL: `${process.env.URL}/auth/twitter/callback`,
+        passReqToCallback: true
       },
-      async function(token: any, tokenSecret: any, profile: any, cb: any) {
+      async function(
+        req: Request,
+        token: any,
+        tokenSecret: any,
+        profile: any,
+        cb: any
+      ) {
         console.log(profile);
         const currentTweeter = await Tweeter.findOne({
           handle: profile.username
@@ -201,6 +221,7 @@ export default async function createApp() {
             tokenSecret,
             photo,
             handle: profile.username,
+            address: req.session.address,
             followerCount: profile._json.followers_count
           });
           cb(null, tweeter);
@@ -209,6 +230,7 @@ export default async function createApp() {
             token,
             tokenSecret,
             handle: profile.username,
+            address: req.session.address,
             photo,
             followerCount: profile._json.followers_count
           });
@@ -217,7 +239,15 @@ export default async function createApp() {
       }
     )
   );
-  app.get("/auth/twitter", passport.authenticate("twitter"));
+  app.get(
+    "/auth/twitter/:address",
+    (req, _res, next) => {
+      const address = req.params.address.toLowerCase();
+      req.session.address = address;
+      next();
+    },
+    passport.authenticate("twitter")
+  );
   app.get(
     "/auth/twitter/callback",
     passport.authenticate("twitter", {
@@ -264,9 +294,6 @@ export default async function createApp() {
 
   await mongoose.connect(process.env.MONGODB_URL);
   const server = createServer(app);
-
-  setInterval(() => closeProposedTweets(web3), 20000); // TODO: Every ten minutes
-  setInterval(() => postTopTweet(), 20000);
 
   return { server, watcher, web3 };
 }

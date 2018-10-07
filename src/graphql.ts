@@ -40,6 +40,9 @@ const typeDefs = `
     tweeter: Tweeter
     proposedAt: Date
     votingEndsAt: Date
+    tweetAt: Date
+    yesStake: Float
+    totalStake: Float
   }
 
   type Tweeter {
@@ -62,9 +65,18 @@ const resolvers = [
         const tweets = await Tweet.find({ status: "proposed" });
         return tweets;
       },
-      acceptedTweets: async () => {
-        const tweets = await Tweet.find({ status: "accepted" });
-        return tweets;
+      acceptedTweets: async (
+        _: any,
+        _args: any,
+        ctx: { getQueuedTweetTime: Function }
+      ) => {
+        const tweets = await Tweet.find({ status: "accepted" }).sort({
+          yesStake: "-1"
+        });
+        return tweets.map((tweet, i) => ({
+          tweetAt: ctx.getQueuedTweetTime(i),
+          ...tweet.toObject()
+        }));
       },
       rejectedTweets: async () => {
         const tweets = await Tweet.find({ status: "rejected" });

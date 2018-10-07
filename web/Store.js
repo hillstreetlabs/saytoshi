@@ -8,6 +8,7 @@ export default class Store {
   @observable hasErrorEnabling = false;
   @observable isUnlocked = undefined;
   @observable tokenBalance = undefined;
+  @observable quorum = undefined;
 
   async start() {
     let web3 = null;
@@ -41,6 +42,11 @@ export default class Store {
     );
     this.isUnlocked = !allowance.isZero();
     this.getBalances();
+    this.interval = setInterval(() => this.refresh(), 4000);
+  }
+
+  stop() {
+    if (this.interval) clearInterval(this.interval);
   }
 
   async refresh() {
@@ -51,6 +57,7 @@ export default class Store {
 
   async getBalances() {
     if (!this.hasWeb3) return;
+    const totalSupply = await this.tokenContract.totalSupply();
     this.tokenBalance = await this.tokenContract.balanceOf(this.currentAddress);
   }
 
