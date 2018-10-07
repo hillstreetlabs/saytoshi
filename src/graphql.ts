@@ -69,11 +69,9 @@ const resolvers = [
             text: string;
             tweeterId: string;
           };
-        },
-        ctx: { watcher: BlockWatcher }
+        }
       ) {
         const tweet = await createTweet(input);
-        ctx.watcher.__test_proposal(tweet.uuid);
         return tweet;
       }
     },
