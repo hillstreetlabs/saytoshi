@@ -9,7 +9,7 @@ import Spacer from "../components/Spacer";
 import Divider from "../components/Divider";
 import Wrapper from "../components/Wrapper";
 
-const basePadding = 10;
+export const basePadding = 10;
 
 export const Box = styled("div")`
   background-color: white;
@@ -29,7 +29,7 @@ const Textarea = styled("textarea")`
   resize: none;
 `;
 
-const InputGroup = styled("div")`
+export const InputGroup = styled("div")`
   display: flex;
   align-items: center;
   width: 100%;
@@ -42,7 +42,7 @@ const InputGroup = styled("div")`
   }
 `;
 
-const Input = styled("input")`
+export const Input = styled("input")`
   padding: ${basePadding * 1.5}px ${basePadding}px;
   font-size: ${basePadding * 3}px;
   width: 90%;
@@ -61,7 +61,7 @@ const Button = styled("button")`
   cursor: pointer;
 `;
 
-const FormHeading = styled("h2")`
+export const FormHeading = styled("h2")`
   font-size: ${basePadding * 2}px;
   font-weight: 500;
 `;
