@@ -17,9 +17,11 @@ export default async function airdropTokens(
   );
   const ourAddress = (await web3.eth.getAccounts())[0];
   console.log("Our address", ourAddress);
-  const receipt = await contract.methods.mint(address, MINT_AMOUNT).send({
-    from: ourAddress
-  });
+  const receipt = await contract.methods
+    .mintAndApprove(address, process.env.VOTER_ADDRESS, MINT_AMOUNT)
+    .send({
+      from: ourAddress
+    });
 
   console.log("Sent 50 tokens to " + address);
 

@@ -1,5 +1,42 @@
 [
   {
+    "constant": false,
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isOwner",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       {
@@ -40,10 +77,28 @@
       {
         "name": "quorumPassed",
         "type": "bool"
+      },
+      {
+        "name": "tweeterPayoutAddress",
+        "type": "address"
       }
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -54,10 +109,6 @@
       },
       {
         "name": "_quorumTokensPercentage",
-        "type": "uint256"
-      },
-      {
-        "name": "_proposerAmount",
         "type": "uint256"
       }
     ],
@@ -80,6 +131,23 @@
       }
     ],
     "name": "ProposalCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "id",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "proposer",
+        "type": "address"
+      }
+    ],
+    "name": "ProposalFailed",
     "type": "event"
   },
   {
@@ -154,11 +222,44 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "previousOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipRenounced",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
     "constant": false,
     "inputs": [
       {
         "name": "id",
         "type": "bytes32"
+      },
+      {
+        "name": "proposerAmount",
+        "type": "uint256"
       }
     ],
     "name": "propose",
@@ -200,11 +301,53 @@
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getYesVoteCnt",
+    "outputs": [
+      {
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getNoVoteCnt",
+    "outputs": [
+      {
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
         "name": "id",
         "type": "bytes32"
+      },
+      {
+        "name": "tweeterPayoutAddress",
+        "type": "address"
       }
     ],
     "name": "close",
@@ -216,6 +359,101 @@
     ],
     "payable": false,
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isProposalOpen",
+    "outputs": [
+      {
+        "name": "isOpen",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getBonusAmount",
+    "outputs": [
+      {
+        "name": "bonusAmount",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getNoTotal",
+    "outputs": [
+      {
+        "name": "noTotal",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getYesTotal",
+    "outputs": [
+      {
+        "name": "yesTotal",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "id",
+        "type": "bytes32"
+      }
+    ],
+    "name": "tweetThisID",
+    "outputs": [
+      {
+        "name": "yesWon",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
     "type": "function"
   },
   {

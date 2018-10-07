@@ -11,6 +11,7 @@ import Divider from "../components/Divider";
 import Wrapper from "../components/Wrapper";
 import graphqlFetch from "../web/graphqlFetch";
 import first from "lodash/first";
+import { utils } from "ethers";
 
 export const basePadding = 10;
 
@@ -80,7 +81,7 @@ export const FormHeading = styled("h2")`
 @observer
 export default class ProposeTweet extends React.Component {
   @observable text = "";
-  @observable stake;
+  @observable stake = "";
   @observable uuid = undefined;
   @observable createStatus = null; // null, "error", "saving", "signing", "confirming"
 
@@ -122,7 +123,12 @@ export default class ProposeTweet extends React.Component {
       this.createStatus = "error";
     }
     try {
-      const result = await this.props.store.voterContract.propose("0x" + uuid);
+      const stake = utils.parseEther(this.stake);
+      console.log(stake);
+      const result = await this.props.store.voterContract.propose(
+        "0x" + uuid,
+        stake
+      );
       this.uuid = uuid;
     } catch (e) {
       console.log(e);

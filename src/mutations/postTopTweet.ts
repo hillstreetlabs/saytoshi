@@ -1,5 +1,5 @@
 import { Tweet } from "../models";
-import sendTweet from "./sendTweet";
+// import sendTweet from "./sendTweet";
 
 export default async function postTopTweet() {
   const acceptedTweets = await Tweet.find({ status: "accepted" });
