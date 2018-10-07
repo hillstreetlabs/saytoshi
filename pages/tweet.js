@@ -12,7 +12,7 @@ import Wrapper from "../components/Wrapper";
 import graphqlFetch from "../web/graphqlFetch";
 import first from "lodash/first";
 
-const basePadding = 14;
+export const basePadding = 10;
 
 export const Box = styled("div")`
   background-color: white;
@@ -23,8 +23,8 @@ export const Box = styled("div")`
 
 const Textarea = styled("textarea")`
   width: 100%;
-  padding: ${basePadding}px;
-  font-size: 28px;
+  padding: ${basePadding * 1.5}px ${basePadding}px;
+  font-size: ${basePadding * 2}px;
   background-color: #eee;
   border-radius: ${basePadding / 2}px;
   border: none;
@@ -32,7 +32,7 @@ const Textarea = styled("textarea")`
   resize: none;
 `;
 
-const InputGroup = styled("div")`
+export const InputGroup = styled("div")`
   display: flex;
   align-items: center;
   width: 100%;
@@ -45,9 +45,9 @@ const InputGroup = styled("div")`
   }
 `;
 
-const Input = styled("input")`
-  padding: ${basePadding}px;
-  font-size: 30px;
+export const Input = styled("input")`
+  padding: ${basePadding * 1.5}px ${basePadding}px;
+  font-size: ${basePadding * 3}px;
   width: 90%;
   background-color: transparent;
   border: none;
@@ -58,10 +58,15 @@ const Button = styled("button")`
   color: white;
   width: 100%;
   display: block;
-  font-size: 22px;
-  padding: ${basePadding * 1.5}px;
+  font-size: 18px;
+  padding: ${basePadding * 2}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
+`;
+
+export const FormHeading = styled("h2")`
+  font-size: ${basePadding * 2}px;
+  font-weight: 500;
 `;
 
 @inject("store")
@@ -116,37 +121,58 @@ export default class ProposeTweet extends React.Component {
     const { username } = this.props.router.query;
     return (
       <AppLayout>
-        <Subheader username={username} selected="tweet" />
         <Spacer />
-        {!this.uuid && (
-          <Box>
-            {this.error && <div style={{ color: "red" }}>{this.error}</div>}
-            <h2>What do you want @{username} to say?</h2>
-            <Spacer size={0.5} />
-            <Textarea placeholder={"Type your tweet here."} rows={3} />
-            <Spacer />
-            <h2>How much are you staking on this tweet?</h2>
-            <Spacer size={0.5} />
-            <InputGroup>
-              <Input />
-              <label>TWEETH</label>
-            </InputGroup>
-            <Spacer />
-            <Button onClick={() => this.createTweet()}>
-              Propose tweet for @{username}
-            </Button>
-          </Box>
-        )}
-        {this.uuid && (
+        <Subheader username={username} selected="tweet" />
+        <Spacer size={1.5} />
+        {this.uuid ? (
           <Box>
             <h2>
               Success. Get people to vote on your tweet{" "}
-              <Link href="vote">
+              <Link href={`/${username}/${this.uuid}`}>
                 <a>here</a>
               </Link>
             </h2>
           </Box>
+        ) : (
+          <Box>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                this.createTweet();
+              }}
+            >
+              {this.error && <div style={{ color: "red" }}>{this.error}</div>}
+              <FormHeading>
+                What do you want{" "}
+                <strong
+                  style={{ fontWeight: 600, textDecoration: "underline" }}
+                >
+                  @{username}
+                </strong>{" "}
+                to say?
+              </FormHeading>
+              <Spacer />
+              <Textarea placeholder={"Type your tweet here."} rows={5} />
+              <Spacer />
+              <FormHeading>How much are you staking on this tweet?</FormHeading>
+              <Spacer size={0.5} />
+              <h4 style={{ fontWeight: 400, color: "#555" }}>
+                If your tweet isn't approved, you'll lose this money.
+              </h4>
+              <Spacer />
+              <InputGroup>
+                <Input />
+                <label>TWEETH</label>
+              </InputGroup>
+              <Spacer size={1.25} />
+              <Button type="submit">
+                Propose tweet for{" "}
+                <strong style={{ fontWeight: 600 }}>@{username}</strong>
+              </Button>
+            </form>
+          </Box>
         )}
+
         <Spacer />
       </AppLayout>
     );

@@ -27,7 +27,6 @@ export default class Subheader extends React.Component {
     const { username, selected } = this.props;
     return (
       <div style={{ textAlign: "center" }}>
-        <Spacer />
         <h1>@{username}</h1>
         <Spacer size={0.5} />
         <div>
@@ -43,7 +42,6 @@ export default class Subheader extends React.Component {
             <SubheaderLink selected={selected === "vote"}>Voting</SubheaderLink>
           </Link>
         </div>
-        <Spacer />
       </div>
     );
   }

@@ -7,7 +7,7 @@ import { utils } from "ethers";
 
 const HeaderContainer = styled("div")`
   width: 100%;
-  height: 60px;
+  height: 40px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -31,11 +31,12 @@ export default class Header extends React.Component {
           <Link href="/">
             <Logo src="/static/logo.png" />
           </Link>
-          <div>
-            <div>{this.props.store.currentAddress}</div>
+          <div style={{ textAlign: "right" }}>
+            <div>Balance</div>
             {this.props.store.tokenBalance && (
               <div>
-                Balance {utils.formatEther(this.props.store.tokenBalance)}
+                {utils.formatEther(this.props.store.tokenBalance)}{" "}
+                <small>TWEETH</small>
               </div>
             )}
           </div>
