@@ -16,6 +16,7 @@ import passport = require("passport");
 import airdropTokens from "./mutations/airdropTokens";
 import closeTweetVoting from "./mutations/closeTweetVoting";
 import closeProposedTweets from "./mutations/closeProposedTweets";
+import postTopTweet from "./mutations/postTopTweet";
 import bodyParser = require("body-parser");
 var GitHubStrategy = require("passport-github").Strategy;
 var TwitterStrategy = require("passport-twitter").Strategy;
@@ -24,8 +25,7 @@ var HDWalletProvider = require("truffle-hdwallet-provider");
 export default async function createApp() {
   const provider = new HDWalletProvider(
     process.env.MNEMONIC,
-    process.env.ETHEREUM_HTTP,
-    1
+    process.env.ETHEREUM_HTTP
   );
   const web3 = new Web3(provider);
 
@@ -191,26 +191,28 @@ export default async function createApp() {
         const currentTweeter = await Tweeter.findOne({
           handle: profile.username
         });
+        const photo = ((profile.photos || [{}])[0].value || "").replace(
+          /_normal/,
+          "_200x200"
+        );
         if (currentTweeter) {
           const tweeter = await currentTweeter.update({
             token,
             tokenSecret,
-            photo: (profile.photos || [{}])[0].value,
+            photo,
+            handle: profile.username,
             followerCount: profile._json.followers_count
           });
           cb(null, tweeter);
-        }
-        try {
+        } else {
           const tweeter = await Tweeter.create({
             token,
             tokenSecret,
             handle: profile.username,
-            photo: (profile.photos || [{}])[0].value,
+            photo,
             followerCount: profile._json.followers_count
           });
           cb(null, tweeter);
-        } catch (e) {
-          cb(null, false);
         }
       }
     )
@@ -264,6 +266,7 @@ export default async function createApp() {
   const server = createServer(app);
 
   setInterval(() => closeProposedTweets(web3), 20000); // TODO: Every ten minutes
+  setInterval(() => postTopTweet(), 20000);
 
   return { server, watcher, web3 };
 }
