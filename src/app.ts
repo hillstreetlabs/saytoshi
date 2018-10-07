@@ -273,6 +273,12 @@ export default async function createApp() {
     return handle(req, res);
   });
 
+  app.get("/t/:uuid", (req, res) => {
+    const actualPage = "/viewTweet";
+    const queryParams = { uuid: req.params.uuid };
+    nextApp.render(req, res, actualPage, queryParams);
+  });
+
   // Custom routes
   app.get("/:username", (req, res) => {
     const actualPage = "/tweet";

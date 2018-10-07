@@ -1,5 +1,6 @@
 import { observable } from "mobx";
 import { providers, Contract } from "ethers";
+import { BigNumber } from "bignumber.js";
 const TweEthVoter = require("../abis/TweEthVoter");
 const ERC20Mintable = require("../abis/ERC20Mintable");
 
@@ -59,6 +60,9 @@ export default class Store {
   async getBalances() {
     if (!this.hasWeb3) return;
     const totalSupply = await this.tokenContract.totalSupply();
+    this.quorum = new BigNumber(totalSupply.toString()).div(
+      new BigNumber("20")
+    );
     this.tokenBalance = await this.tokenContract.balanceOf(this.currentAddress);
   }
 

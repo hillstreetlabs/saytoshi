@@ -88,9 +88,9 @@ export default class Vote extends React.Component {
           <div>
             Voting ends in <Countdown date={tweet.votingEndsAt} />
           </div>
-          <a href={`/t/${tweet.uuid}`} target="_blank">
-            Link ↗
-          </a>
+          <Link as={`/t/${tweet.uuid}`} href={`/viewTweet?uuid=${tweet.uuid}`}>
+            Share Link
+          </Link>
         </Flex>
         <Spacer size={0.5} />
         <Box>
