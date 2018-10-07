@@ -15,7 +15,6 @@ import distanceInWords from "date-fns/distance_in_words";
 import Countdown from "react-countdown-now";
 import graphqlFetch from "../web/graphqlFetch";
 import { utils } from "ethers";
-import { now } from "mobx-utils";
 
 const Photo = styled("img")`
   width: 100px;
@@ -27,11 +26,9 @@ const Photo = styled("img")`
 @withRouter
 @observer
 export default class TweetPage extends React.Component {
-  @observable fetchedTweets = undefined;
-  voteAmounts = observable.map({});
-  didVote = observable.map({});
+  @observable fetchedTweet = undefined;
 
-  static async getInitialProps({ query }) {
+  static async getTweet(uuid) {
     const tweetQuery = `
       query GetTweet($uuid: ID!) {
         tweet(uuid: $uuid) {
@@ -46,42 +43,53 @@ export default class TweetPage extends React.Component {
           }
         }
       }`;
-    const { tweet } = await graphqlFetch(tweetQuery, { uuid: query.uuid });
+    const { tweet } = await graphqlFetch(tweetQuery, { uuid });
+    return tweet;
+  }
+
+  static async getInitialProps({ query }) {
+    const tweet = await TweetPage.getTweet(query.uuid);
     return { tweet };
+  }
+
+  componentDidMount() {
+    this.interval = setInterval(() => this.refresh(), 2500);
+  }
+
+  componentWillUnmount() {
+    if (this.interval) clearTimeout(this.interval);
+  }
+
+  async refresh() {
+    this.fetchedTweet = await TweetPage.getTweet(this.props.router.query.uuid);
+  }
+
+  get tweet() {
+    return this.fetchedTweet || this.props.tweet;
   }
 
   render() {
     const { username } = this.props.router.query;
-    const { tweet } = this.props;
-    const votingEndsAt = new Date(tweet.votingEndsAt).getTime();
-    const rightNow = now();
-    let status = "voting";
-    if (rightNow - votingEndsAt > 0) status = "pending";
-    if (rightNow - votingEndsAt > 120000) status = "claiming";
     return (
       <AppLayout>
         <Spacer />
         <div style={{ textAlign: "center" }}>
-          <Photo src={tweet.tweeter.photo} />
+          <Photo src={this.tweet.tweeter.photo} />
           <Spacer size={0.5} />
           <div>
             <Link
-              as={`/${tweet.tweeter.handle}`}
-              href={`/tweet?username=${tweet.tweeter.handle}`}
+              as={`/${this.tweet.tweeter.handle}`}
+              href={`/tweet?username=${this.tweet.tweeter.handle}`}
             >
-              <h2 style={{ cursor: "pointer" }}>@{tweet.tweeter.handle}</h2>
+              <h2 style={{ cursor: "pointer" }}>
+                @{this.tweet.tweeter.handle}
+              </h2>
             </Link>
-            <small>{tweet.tweeter.followerCount} Followers</small>
+            <small>{this.tweet.tweeter.followerCount} Followers</small>
           </div>
         </div>
         <Spacer size={1.5} />
-        {status === "claiming" && (
-          <Box style={{ textAlign: "center" }}>
-            This vote has resolved. Redeem interface coming soon.
-          </Box>
-        )}
-        {status === "pending" && <div>Pending</div>}
-        {status === "voting" && <Vote tweet={this.props.tweet} />}
+        <Vote tweet={this.tweet} />
       </AppLayout>
     );
   }

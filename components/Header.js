@@ -31,6 +31,17 @@ const Button = styled("button")`
   cursor: pointer;
 `;
 
+const AccountButton = styled("div")`
+  padding: 5px 10px;
+  margin: -5px -10px;
+  border-radius: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #dadada;
+  }
+`;
+
 @inject("store")
 @withRouter
 @observer
@@ -46,13 +57,15 @@ export default class Header extends React.Component {
           </Link>
           <div style={{ textAlign: "right" }}>
             {tokenBalance && tokenBalance > 0 ? (
-              <div>
-                <div>Balance</div>
-                <div>
-                  {utils.formatEther(this.props.store.tokenBalance)}{" "}
-                  <small>TWEETH</small>
-                </div>
-              </div>
+              <Link href="/account">
+                <AccountButton>
+                  <div>Balance</div>
+                  <div>
+                    {utils.formatEther(this.props.store.tokenBalance)}{" "}
+                    <small>TWEETH</small>
+                  </div>
+                </AccountButton>
+              </Link>
             ) : (
               <Link href="/airdrop">
                 <Button>💸 Airdrop</Button>
