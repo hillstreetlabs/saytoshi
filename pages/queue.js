@@ -29,6 +29,7 @@ export default class Queue extends React.Component {
           proposedAt
           votingEndsAt
           tweetAt
+          status
           tweeter {
             handle
           }
@@ -49,7 +50,7 @@ export default class Queue extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.interval) clearTimeout(this.interval);
+    if (this.interval) clearInterval(this.interval);
   }
 
   async refresh() {

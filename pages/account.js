@@ -32,6 +32,9 @@ export default class Account extends React.Component {
           text
           proposedAt
           votingEndsAt
+          status
+          tweetId
+          tweetedAt
           tweeter {
             handle
           }

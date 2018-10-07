@@ -61,6 +61,7 @@ export default class VotePage extends React.Component {
           text
           proposedAt
           votingEndsAt
+          status
           tweeter {
             handle
           }
@@ -82,7 +83,7 @@ export default class VotePage extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.interval) clearTimeout(this.interval);
+    if (this.interval) clearInterval(this.interval);
   }
 
   async refresh() {

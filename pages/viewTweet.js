@@ -36,6 +36,9 @@ export default class TweetPage extends React.Component {
           text
           proposedAt
           votingEndsAt
+          status
+          tweetId
+          tweetedAt
           tweeter {
             handle
             photo
@@ -57,7 +60,7 @@ export default class TweetPage extends React.Component {
   }
 
   componentWillUnmount() {
-    if (this.interval) clearTimeout(this.interval);
+    if (this.interval) clearInterval(this.interval);
   }
 
   async refresh() {

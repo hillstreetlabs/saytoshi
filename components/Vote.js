@@ -1,11 +1,12 @@
 import { observer, inject } from "mobx-react";
-import { observable } from "mobx";
+import { observable, computed, when } from "mobx";
 import Link from "next/link";
 import styled from "react-emotion";
 import { withRouter } from "next/router";
 import Header from "./Header";
 import Wrapper from "./Wrapper";
 import Subheader from "./Subheader";
+import Badge from "./Badge";
 import AppLayout from "./AppLayout";
 import Spacer from "./Spacer";
 import Divider from "./Divider";
@@ -30,6 +31,7 @@ const Flex = styled("div")`
 
 const Button = styled("button")`
   background-color: #822dff;
+  border: 0 none;
   color: white;
   width: 100%;
   display: block;
@@ -52,6 +54,55 @@ const RejectButton = styled(Button)`
   background-color: #a71de8;
 `;
 
+const Progress = styled("div")`
+  height: 5px;
+  width: 100%;
+  background-color: #dfdfdf;
+  border-radius: 0 0 5px 5px;
+  overflow: hidden;
+  & > div {
+    height: 5px;
+
+    background-color: #aaa;
+  }
+`;
+
+const ProgressInputGroup = styled(InputGroup)`
+  border-radius: 5px 5px 0 0;
+`;
+
+const TallyPercentage = styled("div")`
+  height: 5px;
+  width: 100%;
+  background-color: #e069c6;
+  border-radius: 4px;
+  overflow: hidden;
+  & > div {
+    height: 5px;
+
+    background-color: #80dc7a;
+  }
+`;
+
+@observer
+class VoteTally extends React.Component {
+  render() {
+    const { data } = this.props;
+    return (
+      <div>
+        <Flex>
+          <div>{data.percentageYes}% Yes</div>
+          <div>{data.percentageNo}% No</div>
+        </Flex>
+        <TallyPercentage>
+          <div style={{ width: data.percentageYes + "%" }} />
+        </TallyPercentage>
+      </div>
+    );
+  }
+}
+
+@observer
 class CreatingTweet extends React.Component {
   render() {
     const { tweet } = this.props;
@@ -66,14 +117,63 @@ class CreatingTweet extends React.Component {
   }
 }
 
+@inject("store")
+@observer
 class ResolvedTweet extends React.Component {
-  render() {
+  @observable claimStatus = "none"; // none, signing, saving, success
+
+  tweetLink(tweet) {
+    return `https://twitter.com/${tweet.tweeter.handle}/status/${
+      tweet.tweetId
+    }`;
+  }
+
+  async claim() {
+    this.isError = false;
+    this.claimStatus = "signing";
+    const currentBalance = this.props.store.tokenBalance;
     const { tweet } = this.props;
+    try {
+      const receipt = await this.props.store.voterContract.claim([
+        "0x" + tweet.uuid
+      ]);
+      this.claimStatus = "saving";
+      await when(() => this.props.store.tokenBalance.gt(currentBalance));
+      this.claimStatus = "success";
+    } catch (e) {
+      this.claimStatus = "none";
+      this.isError = "true";
+    }
+  }
+
+  render() {
+    const { tweet, claimableAmount } = this.props;
     return (
       <div>
         <Flex>
           <div>
-            Voting ended {distanceInWords(now(), tweet.votingEndsAt)} ago
+            {tweet.tweetId &&
+              tweet.tweeter && (
+                <span>
+                  <a href={this.tweetLink(tweet)}>Tweeted</a>{" "}
+                  {tweet.tweetedAt
+                    ? distanceInWords(now(), tweet.tweetedAt, {
+                        addSuffix: true
+                      })
+                    : null}
+                </span>
+              )}
+            {tweet.status === "rejected" && (
+              <span>
+                Rejected {distanceInWords(now(), tweet.votingEndsAt)} ago
+              </span>
+            )}
+            {!tweet.tweetId &&
+              tweet.status !== "rejected" && (
+                <span>
+                  Voting ended {distanceInWords(now(), tweet.votingEndsAt)} ago
+                </span>
+              )}
           </div>
           <Link as={`/t/${tweet.uuid}`} href={`/viewTweet?uuid=${tweet.uuid}`}>
             Direct Link
@@ -81,7 +181,49 @@ class ResolvedTweet extends React.Component {
         </Flex>
         <Spacer size={0.5} />
         <Box style={{ textAlign: "center" }}>
-          This vote has resolved. Redeem interface coming soon.
+          <h3 style={{ fontWeight: 400, lineHeight: 1.4, fontSize: 20 }}>
+            {tweet.text}
+          </h3>
+          <Spacer small />
+          <VoteTally data={this.props.data} />
+          <Spacer />
+          {this.isError && (
+            <React.Fragment>
+              <Alert>
+                There was a problem claiming your tokens. Please try again.
+              </Alert>
+              <Spacer small />
+            </React.Fragment>
+          )}
+          {this.claimStatus === "success" ? (
+            <div style={{ color: "#aaa" }}>Successfully claimed tokens</div>
+          ) : (
+            <div>
+              {claimableAmount ? (
+                claimableAmount.isZero() ? (
+                  <div style={{ color: "#aaa" }}>Nothing to redeem</div>
+                ) : (
+                  <Button
+                    onClick={() => this.claim()}
+                    disabled={this.claimStatus !== "none"}
+                  >
+                    {this.claimStatus === "none" && (
+                      <span>
+                        Claim {utils.formatEther(claimableAmount)}{" "}
+                        <small>TWEETH</small>
+                      </span>
+                    )}
+                    {this.claimStatus === "signing" && (
+                      <span>Check your wallet for details</span>
+                    )}
+                    {this.claimStatus === "saving" && (
+                      <span>Waiting for transaction...</span>
+                    )}
+                  </Button>
+                )
+              ) : null}
+            </div>
+          )}
         </Box>
         <Spacer size={1.5} />
       </div>
@@ -89,6 +231,7 @@ class ResolvedTweet extends React.Component {
   }
 }
 
+@observer
 class PendingTweet extends React.Component {
   render() {
     const { tweet } = this.props;
@@ -117,7 +260,66 @@ class PendingTweet extends React.Component {
 @observer
 export default class Vote extends React.Component {
   @observable voteAmount = "";
-  @observable didVote = false;
+  @observable didVote = true;
+  @observable claimableAmount = undefined;
+  @observable voteStatus = "none";
+  @observable yesTotal = undefined;
+  @observable noTotal = undefined;
+
+  componentDidMount() {
+    this.getTweetDetails();
+    this.interval = setInterval(() => this.getTweetDetails(), 5000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  }
+
+  @computed
+  get totalAmountStaked() {
+    if (!this.noTotal && !this.yesTotal) return utils.bigNumberify(0);
+    if (!this.noTotal) return this.yesTotal;
+    if (!this.yesTotal) return this.noTotal;
+    return this.noTotal.add(this.yesTotal);
+  }
+
+  @computed
+  get percentageYes() {
+    if (!this.yesTotal || this.totalAmountStaked.isZero()) return 0;
+    return parseFloat(
+      this.yesTotal
+        .mul(100)
+        .div(this.totalAmountStaked)
+        .toString()
+    );
+  }
+
+  @computed
+  get percentageNo() {
+    if (!this.noTotal || this.totalAmountStaked.isZero()) return 0;
+    return parseFloat(
+      this.noTotal
+        .mul(100)
+        .div(this.totalAmountStaked)
+        .toString()
+    );
+  }
+
+  async getTweetDetails() {
+    const { voterContract } = await this.props.store.getContracts();
+    const proposal = await voterContract.uuidToProposals(
+      "0x" + this.props.tweet.uuid
+    );
+    this.noTotal = proposal.noTotal;
+    this.yesTotal = proposal.yesTotal;
+
+    await when(() => this.props.store.currentAddress);
+    const claimableAmount = await voterContract.claimableAmount(
+      "0x" + this.props.tweet.uuid,
+      this.props.store.currentAddress
+    );
+    this.claimableAmount = claimableAmount;
+  }
 
   get isValid() {
     return this.voteAmount && this.voteAmount.match(/^[0-9.]+$/);
@@ -127,17 +329,45 @@ export default class Vote extends React.Component {
     const uuid = this.props.tweet.uuid;
     if (!this.isValid) return;
     const amount = utils.parseEther(this.voteAmount);
+    this.voteStatus = isYes ? "approving" : "rejecting";
     try {
+      const currentBalance = this.props.store.tokenBalance;
       const result = await this.props.store.voterContract.vote(
         "0x" + uuid,
         amount,
         isYes
       );
+      await when(() => this.props.store.tokenBalance.lt(currentBalance));
+      await this.getTweetDetails();
       this.didVote = true;
+      this.voteStatus = "none";
     } catch (e) {
+      this.voteStatus = "none";
       console.error(e);
       this.error = "Something went wrong voting on the tweet 😕";
     }
+  }
+
+  @computed
+  get stakeRequired() {
+    if (!this.props.store.quorum) return 0;
+    const quorum = utils.bigNumberify(this.props.store.quorum.toString());
+    if (this.totalAmountStaked.gte(quorum)) return undefined;
+    return quorum.sub(this.totalAmountStaked);
+  }
+
+  @computed
+  get percentageToQuorum() {
+    if (!this.props.store.quorum) return 0;
+    const quorum = utils.bigNumberify(this.props.store.quorum.toString());
+    let number = parseFloat(
+      this.totalAmountStaked
+        .mul(utils.bigNumberify("10000"))
+        .div(quorum)
+        .toString()
+    );
+    number /= 100;
+    return Math.min(number, 100);
   }
 
   render() {
@@ -147,7 +377,13 @@ export default class Vote extends React.Component {
     const votingEndsAt = new Date(tweet.votingEndsAt).getTime();
     const rightNow = now();
     if (rightNow - votingEndsAt > 120000)
-      return <ResolvedTweet tweet={tweet} />;
+      return (
+        <ResolvedTweet
+          data={this}
+          claimableAmount={this.claimableAmount}
+          tweet={tweet}
+        />
+      );
     if (rightNow - votingEndsAt > 0) return <PendingTweet tweet={tweet} />;
     return (
       <div>
@@ -165,38 +401,61 @@ export default class Vote extends React.Component {
             {tweet.text}
           </h3>
           <Divider padded color={"#dadada"} />
-          <FormHeading>Vote amount</FormHeading>
-          <Spacer size={0.5} />
-          <InputGroup>
-            <Input
-              onChange={e => (this.voteAmount = e.target.value)}
-              value={this.voteAmount}
-              placeholder="0.0"
-            />
-            <label>TWEETH</label>
-          </InputGroup>
-          <Spacer />
-          {this.props.store.hasWeb3 ? (
-            <Flex>
-              <ApproveButton
-                disabled={!this.isValid}
-                onClick={() => this.castVote(true)}
-              >
-                👍 Approve
-              </ApproveButton>
-              <Spacer inline size={0.5} />
-              <RejectButton
-                disabled={!this.isValid}
-                onClick={() => this.castVote(false)}
-              >
-                👎 Reject
-              </RejectButton>
-            </Flex>
+          {this.didVote ? (
+            <VoteTally data={this} />
           ) : (
-            <Alert>
-              Please make sure you are connected to Ethereum and your wallet is
-              unlocked.
-            </Alert>
+            <div>
+              <FormHeading>Vote amount</FormHeading>
+              <Spacer size={0.5} />
+              <ProgressInputGroup>
+                <Input
+                  onChange={e => (this.voteAmount = e.target.value)}
+                  value={this.voteAmount}
+                  placeholder="0.0"
+                />
+                <label>TWEETH</label>
+              </ProgressInputGroup>
+              <Progress>
+                <div style={{ width: this.percentageToQuorum + "%" }} />
+              </Progress>
+              <Spacer small />
+              <div>
+                <b>{Math.floor(this.percentageToQuorum)}% of quorum</b>.{" "}
+                {this.percentageToQuorum < 100 && (
+                  <span>
+                    {utils.formatEther(this.stakeRequired)} additional TWEETH
+                    required.
+                  </span>
+                )}
+              </div>
+              <Spacer />
+              {this.props.store.hasWeb3 ? (
+                <Flex>
+                  <ApproveButton
+                    disabled={!this.isValid || this.voteStatus !== "none"}
+                    onClick={() => this.castVote(true)}
+                  >
+                    {this.voteStatus === "approving"
+                      ? "Approving..."
+                      : "👍 Approve"}
+                  </ApproveButton>
+                  <Spacer inline size={0.5} />
+                  <RejectButton
+                    disabled={!this.isValid || this.voteStatus !== "none"}
+                    onClick={() => this.castVote(false)}
+                  >
+                    {this.voteStatus === "rejecting"
+                      ? "Approving..."
+                      : "👎 Reject"}
+                  </RejectButton>
+                </Flex>
+              ) : (
+                <Alert>
+                  Please make sure you are connected to Ethereum and your wallet
+                  is unlocked.
+                </Alert>
+              )}
+            </div>
           )}
         </Box>
         <Spacer size={1.5} />

@@ -32,15 +32,18 @@ export default async function createApp() {
   const watcher = new BlockWatcher(web3);
 
   // Hacky "scheduled jobs" -- would ideally be done with cron
-  setInterval(() => closeProposedTweets(web3), 20000); // TODO: Every ten minutes
+  setInterval(() => closeProposedTweets(web3), 20000);
 
   // This is a super hacky way of predictably scheduling things with setInterval
   const timeBetweenTweets = 120000;
   let nextTweetTime = Date.now() + timeBetweenTweets;
   const getQueuedTweetTime = (queuePosition: number) =>
     new Date(nextTweetTime + timeBetweenTweets * queuePosition);
-  setInterval(() => {
-    postTopTweet();
+  setInterval(async () => {
+    const tweeters = await Tweeter.find({});
+    for (let tweeter of tweeters) {
+      postTopTweet(tweeter.handle);
+    }
     nextTweetTime = Date.now() + timeBetweenTweets;
   }, timeBetweenTweets);
 
@@ -216,6 +219,12 @@ export default async function createApp() {
         const currentTweeter = await Tweeter.findOne({
           handle: profile.username
         });
+        if (req.session.revoke) {
+          delete req.session.revoke;
+          if (!currentTweeter) return;
+          await Tweeter.deleteOne({ _id: currentTweeter._id });
+          cb(null, { empty: true });
+        }
         const photo = ((profile.photos || [{}])[0].value || "").replace(
           /_normal/,
           "_200x200"
@@ -256,6 +265,14 @@ export default async function createApp() {
       // Successful authentication, redirect home.
       res.redirect("/?createdTweeter");
     }
+  );
+  app.get(
+    "/auth/twitter/revoke",
+    (req, _res, next) => {
+      req.session.revoke = true;
+      next();
+    },
+    passport.authenticate("twitter")
   );
   app.get(
     "/auth/twitter/:address",

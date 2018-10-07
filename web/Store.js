@@ -1,4 +1,4 @@
-import { observable } from "mobx";
+import { observable, when } from "mobx";
 import { providers, Contract } from "ethers";
 import { BigNumber } from "bignumber.js";
 const TweEthVoter = require("../abis/TweEthVoter");
@@ -10,6 +10,9 @@ export default class Store {
   @observable isUnlocked = undefined;
   @observable tokenBalance = undefined;
   @observable quorum = undefined;
+
+  @observable voterContract = undefined;
+  @observable tokenContract = undefined;
 
   async start() {
     let web3 = null;
@@ -49,6 +52,16 @@ export default class Store {
 
   stop() {
     if (this.interval) clearInterval(this.interval);
+  }
+
+  async getContracts() {
+    if (!this.voterContract || !this.tokenContract) {
+      await when(() => this.voterContract && this.tokenContract);
+    }
+    return {
+      voterContract: this.voterContract,
+      tokenContract: this.tokenContract
+    };
   }
 
   async refresh() {
