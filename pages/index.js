@@ -27,17 +27,17 @@ export default class Index extends React.Component {
   render() {
     return (
       <AppLayout>
-        <Wrapper>
-          <Header />
-          <Spacer size={2} />
-          <Hero>
-            <h1>Your chance to decide what influencers say.</h1>
-            <Spacer size={0.5} />
-            <h3>SayToshi is Ethereum's decentralized social media manager.</h3>
-          </Hero>
-          <Spacer size={2} />
-          <TweetLink username="elonmusk">Tweet for @elonmusk</TweetLink>
-        </Wrapper>
+        <Spacer size={2} />
+        <Hero>
+          <h1>Decide what crypto influencers say.</h1>
+          <Spacer size={0.5} />
+          <h3 style={{ fontWeight: 400 }}>
+            SayToshi is Ethereum's decentralized social media manager.
+          </h3>
+        </Hero>
+        <Spacer size={2} />
+        <TweetLink username="elonmusk">Tweet for @elonmusk</TweetLink>
+        <Spacer size={3} />
       </AppLayout>
     );
   }

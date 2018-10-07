@@ -1,4 +1,7 @@
 import styled from "react-emotion";
+import Wrapper from "./Wrapper";
+import Header from "./Header";
+import Footer from "./Footer";
 
 const Background = styled("div")`
   position: fixed;
@@ -27,7 +30,13 @@ export default class AppLayout extends React.Component {
     return (
       <div>
         <Background />
-        <Container>{this.props.children}</Container>
+        <Container>
+          <Wrapper>
+            <Header />
+            {this.props.children}
+            <Footer />
+          </Wrapper>
+        </Container>
       </div>
     );
   }

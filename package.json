@@ -20,6 +20,7 @@
     "bignumber.js": "^7.2.1",
     "compression": "^1.7.3",
     "cors": "^2.8.4",
+    "date-fns": "^1.29.0",
     "dotenv": "^6.0.0",
     "emotion": "^9.2.12",
     "emotion-server": "^9.2.12",

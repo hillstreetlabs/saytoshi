@@ -11,7 +11,7 @@ import Wrapper from "../components/Wrapper";
 
 const basePadding = 14;
 
-const Box = styled("div")`
+export const Box = styled("div")`
   background-color: white;
   padding: ${props => !props.noPadding && basePadding * 2}px;
   border-radius: ${basePadding}px;
@@ -58,6 +58,7 @@ const Button = styled("button")`
   font-size: 22px;
   padding: ${basePadding * 1.5}px;
   border-radius: ${basePadding / 2}px;
+  cursor: pointer;
 `;
 
 @inject("store")
@@ -68,25 +69,23 @@ export default class ProposeTweet extends React.Component {
     const { username } = this.props.router.query;
     return (
       <AppLayout>
-        <Wrapper>
-          <Header />
-          <Subheader username={username} />
-          <Box>
-            <h2>What do you want @{username} to say?</h2>
-            <Spacer size={0.5} />
-            <Textarea placeholder={"Type your tweet here."} rows={3} />
-            <Spacer />
-            <h2>How much are you staking on this tweet?</h2>
-            <Spacer size={0.5} />
-            <InputGroup>
-              <Input />
-              <label>TWEETH</label>
-            </InputGroup>
-            <Spacer />
-            <Button>Propose tweet for @{username}</Button>
-          </Box>
+        <Subheader username={username} selected="tweet" />
+        <Spacer />
+        <Box>
+          <h2>What do you want @{username} to say?</h2>
+          <Spacer size={0.5} />
+          <Textarea placeholder={"Type your tweet here."} rows={3} />
           <Spacer />
-        </Wrapper>
+          <h2>How much are you staking on this tweet?</h2>
+          <Spacer size={0.5} />
+          <InputGroup>
+            <Input />
+            <label>TWEETH</label>
+          </InputGroup>
+          <Spacer />
+          <Button>Propose tweet for @{username}</Button>
+        </Box>
+        <Spacer />
       </AppLayout>
     );
   }

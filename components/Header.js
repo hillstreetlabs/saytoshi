@@ -1,5 +1,6 @@
 import { observer, inject } from "mobx-react";
 import styled from "react-emotion";
+import { withRouter } from "next/router";
 import Link from "next/link";
 import Spacer from "./Spacer";
 
@@ -18,6 +19,7 @@ const Logo = styled("img")`
 `;
 
 @inject("store")
+@withRouter
 @observer
 export default class Header extends React.Component {
   render() {
