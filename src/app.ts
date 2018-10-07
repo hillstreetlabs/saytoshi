@@ -187,11 +187,26 @@ export default async function createApp() {
         callbackURL: `${process.env.URL}/auth/twitter/callback`
       },
       async function(token: any, tokenSecret: any, profile: any, cb: any) {
+        console.log(profile);
+        const currentTweeter = await Tweeter.findOne({
+          handle: profile.username
+        });
+        if (currentTweeter) {
+          const tweeter = await currentTweeter.update({
+            token,
+            tokenSecret,
+            photo: (profile.photos || [{}])[0].value,
+            followerCount: profile._json.followers_count
+          });
+          cb(null, tweeter);
+        }
         try {
           const tweeter = await Tweeter.create({
             token,
             tokenSecret,
-            handle: profile.username
+            handle: profile.username,
+            photo: (profile.photos || [{}])[0].value,
+            followerCount: profile._json.followers_count
           });
           cb(null, tweeter);
         } catch (e) {

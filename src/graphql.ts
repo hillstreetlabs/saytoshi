@@ -45,6 +45,8 @@ const typeDefs = `
   type Tweeter {
     id: ID
     handle: String
+    photo: String
+    followerCount: Int
   }
 `;
 
