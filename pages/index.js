@@ -7,22 +7,68 @@ import Spacer from "../components/Spacer";
 import Wrapper from "../components/Wrapper";
 import graphqlFetch from "../web/graphqlFetch";
 
+const basePadding = 10;
+
 const Hero = styled("div")`
   text-align: center;
 `;
 
 const Photo = styled.img`
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+  border: 2px solid #822dff;
+`;
+
+const Tweeter = styled("div")`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: ${props => !props.noPadding && basePadding * 2}px;
+  border-radius: ${basePadding}px;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+
+  &:hover {
+    background-color: #fafafa;
+  }
+
+  &:active {
+    box-shadow: 0 2px 4px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+`;
+
+const Flex = styled("div")`
+  display: flex;
+  align-items: center;
 `;
 
 class TweetLink extends React.Component {
   render() {
-    const { username, children, ...props } = this.props;
+    const { tweeter, ...props } = this.props;
     return (
-      <Link as={`/${username}`} href={`/tweet?username=${username}`}>
-        <a {...props}>{children}</a>
+      <Link
+        as={`/${tweeter.handle}`}
+        href={`/tweet?username=${tweeter.handle}`}
+      >
+        <Tweeter>
+          <Flex>
+            <Photo src={tweeter.photo} />
+            <Spacer inline small />
+            <div>
+              <h3 style={{ fontWeight: 500 }}>@{tweeter.handle}</h3>
+              <div style={{ color: "#555" }}>
+                {tweeter.followerCount} followers
+              </div>
+            </div>
+          </Flex>
+          <div>
+            <i style={{ fontSize: 30 }} className="material-icons">
+              keyboard_arrow_right
+            </i>
+          </div>
+        </Tweeter>
       </Link>
     );
   }
@@ -45,6 +91,12 @@ export default class Index extends React.Component {
     return { tweeters };
   }
 
+  get sortedTweeters() {
+    return this.props.tweeters.sort(
+      (a, b) => b.followerCount - a.followerCount
+    );
+  }
+
   render() {
     return (
       <AppLayout>
@@ -57,19 +109,12 @@ export default class Index extends React.Component {
           </h3>
         </Hero>
         <Spacer size={2} />
-        {this.props.tweeters.map(tweeter => (
+        {this.sortedTweeters.map(tweeter => (
           <div key={tweeter.id}>
-            <TweetLink
-              username={tweeter.handle}
-              style={{ display: "inline-flex", alignItems: "center" }}
-            >
-              <Photo src={tweeter.photo} />
-              <Spacer inline small />
-              <span>
-                Tweet for @{tweeter.handle} <Spacer inline small />
-                <small>({tweeter.followerCount} followers)</small>
-              </span>
-            </TweetLink>
+            <div>
+              <TweetLink tweeter={tweeter} />
+            </div>
+            <Spacer />
           </div>
         ))}
         <Spacer size={3} />

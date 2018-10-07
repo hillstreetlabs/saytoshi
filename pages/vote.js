@@ -124,6 +124,18 @@ export default class VotePage extends React.Component {
         <Subheader username={username} selected="vote" />
         <Spacer size={1.5} />
         {this.tweets.map((tweet, i) => <Vote key={tweet.uuid} tweet={tweet} />)}
+        {this.tweets.length === 0 && (
+          <div style={{ textAlign: "center" }}>
+            <Spacer size={2} />
+            <h3 style={{ color: "#555", fontWeight: 400 }}>
+              No proposed tweets for @{username}.{" "}
+              <Link as={`/${username}`} href={`/tweet?username=${username}`}>
+                <a>Add one now.</a>
+              </Link>
+            </h3>
+            <Spacer size={3} />
+          </div>
+        )}
       </AppLayout>
     );
   }

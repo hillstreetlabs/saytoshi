@@ -162,7 +162,7 @@ export default class ProposeTweet extends React.Component {
               </h4>
               <Spacer />
               <InputGroup>
-                <Input />
+                <Input placeholder={"0.0"} />
                 <label>TWEETH</label>
               </InputGroup>
               <Spacer size={1.25} />

@@ -19,11 +19,24 @@ const Logo = styled("img")`
   cursor: pointer;
 `;
 
+const Button = styled("button")`
+  background-color: #381de8;
+  color: white;
+  width: 100%;
+  display: block;
+  font-size: 18px;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
 @inject("store")
 @withRouter
 @observer
 export default class Header extends React.Component {
   render() {
+    const { tokenBalance } = this.props.store;
     return (
       <div>
         <Spacer />
@@ -32,12 +45,18 @@ export default class Header extends React.Component {
             <Logo src="/static/logo.png" />
           </Link>
           <div style={{ textAlign: "right" }}>
-            <div>Balance</div>
-            {this.props.store.tokenBalance && (
+            {tokenBalance && tokenBalance > 0 ? (
               <div>
-                {utils.formatEther(this.props.store.tokenBalance)}{" "}
-                <small>TWEETH</small>
+                <div>Balance</div>
+                <div>
+                  {utils.formatEther(this.props.store.tokenBalance)}{" "}
+                  <small>TWEETH</small>
+                </div>
               </div>
+            ) : (
+              <Link href="/airdrop">
+                <Button>💸 Airdrop</Button>
+              </Link>
             )}
           </div>
         </HeaderContainer>
