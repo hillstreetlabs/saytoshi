@@ -19,7 +19,8 @@ export default async function airdropTokens(
   const receipt = await contract.methods
     .mintAndApprove(address, process.env.VOTER_ADDRESS, MINT_AMOUNT)
     .send({
-      from: ourAddress
+      from: ourAddress,
+      gasPrice: 10000000000
     });
 
   console.log("Sent 50 tokens to " + address);
