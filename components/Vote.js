@@ -476,7 +476,7 @@ export default class Vote extends React.Component {
                     onClick={() => this.castVote(false)}
                   >
                     {this.voteStatus === "rejecting"
-                      ? "Approving..."
+                      ? "Rejecting..."
                       : "👎 Reject"}
                   </RejectButton>
                 </Flex>
