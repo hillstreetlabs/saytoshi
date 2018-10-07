@@ -8,8 +8,8 @@ const typeDefs = `
 
   type Query {
     pendingTweets: [Tweet]
-    proposedTweets: [Tweet]
-    acceptedTweets: [Tweet]
+    proposedTweets(handle: String): [Tweet]
+    acceptedTweets(handle: String): [Tweet]
     rejectedTweets: [Tweet]
     tweetedTweets: [Tweet]
     tweet(uuid: ID!): Tweet
@@ -63,16 +63,24 @@ const resolvers = [
         const tweets = await Tweet.find({ status: "pending" });
         return tweets;
       },
-      proposedTweets: async () => {
-        const tweets = await Tweet.find({ status: "proposed" });
+      proposedTweets: async (_: any, args: { handle: string }) => {
+        const tweeter = await Tweeter.findOne({ handle: args.handle });
+        const tweets = await Tweet.find({
+          status: "proposed",
+          tweeterId: tweeter._id
+        });
         return tweets;
       },
       acceptedTweets: async (
         _: any,
-        _args: any,
+        args: { handle: string },
         ctx: { getQueuedTweetTime: Function }
       ) => {
-        const tweets = await Tweet.find({ status: "accepted" }).sort({
+        const tweeter = await Tweeter.findOne({ handle: args.handle });
+        const tweets = await Tweet.find({
+          status: "accepted",
+          tweeterId: tweeter._id
+        }).sort({
           yesStake: "-1"
         });
         return tweets.map((tweet, i) => ({

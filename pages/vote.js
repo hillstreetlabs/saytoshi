@@ -53,10 +53,10 @@ export default class VotePage extends React.Component {
   voteAmounts = observable.map({});
   didVote = observable.map({});
 
-  static async getTweets() {
+  static async getTweets(handle) {
     const tweetsQuery = `
-      query AcceptedTweets {
-        proposedTweets {
+      query ProposedTweets($handle: String) {
+        proposedTweets(handle: $handle) {
           uuid
           text
           proposedAt
@@ -66,12 +66,14 @@ export default class VotePage extends React.Component {
           }
         }
       }`;
-    const { proposedTweets } = await graphqlFetch(tweetsQuery);
-    return proposedTweets;
+    const { proposedTweets } = await graphqlFetch(tweetsQuery, { handle });
+    return proposedTweets.sort(
+      (a, b) => new Date(b.votingEndsAt) - new Date(a.votingEndsAt)
+    );
   }
 
-  static async getInitialProps() {
-    const tweets = await VotePage.getTweets();
+  static async getInitialProps({ query }) {
+    const tweets = await VotePage.getTweets(query.username);
     return { tweets };
   }
 
@@ -84,7 +86,7 @@ export default class VotePage extends React.Component {
   }
 
   async refresh() {
-    const tweets = await VotePage.getTweets();
+    const tweets = await VotePage.getTweets(this.props.router.query.username);
     this.fetchedTweets = tweets;
   }
 
