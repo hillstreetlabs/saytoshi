@@ -35,7 +35,7 @@ export default class Revoke extends React.Component {
             <h2 style={{ fontWeight: 400 }}>Revoke access to your Twitter</h2>
           </div>
           <Spacer />
-          <a href={`/auth/twitter`} style={{ textDecoration: "none" }}>
+          <a href={`/auth/twitter/revoke`} style={{ textDecoration: "none" }}>
             <Button>Confirm your Twitter account</Button>
           </a>
         </Box>

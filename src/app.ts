@@ -216,6 +216,12 @@ export default async function createApp() {
         const currentTweeter = await Tweeter.findOne({
           handle: profile.username
         });
+        if (req.session.revoke) {
+          delete req.session.revoke;
+          if (!currentTweeter) return;
+          await Tweeter.deleteOne({ _id: currentTweeter._id });
+          cb(null, { empty: true });
+        }
         const photo = ((profile.photos || [{}])[0].value || "").replace(
           /_normal/,
           "_200x200"
@@ -256,6 +262,14 @@ export default async function createApp() {
       // Successful authentication, redirect home.
       res.redirect("/?createdTweeter");
     }
+  );
+  app.get(
+    "/auth/twitter/revoke",
+    (req, _res, next) => {
+      req.session.revoke = true;
+      next();
+    },
+    passport.authenticate("twitter")
   );
   app.get(
     "/auth/twitter/:address",

@@ -26,11 +26,10 @@ export default async function closeTweetVoting(web3: Web3, uuid: string) {
 
   // Close tweeting to let people get paid
   const ourAddress = (await web3.eth.getAccounts())[0];
-  await contract.methods
-    .close("0x" + uuid, tweeter.address || ourAddress)
-    .send({
-      from: ourAddress
-    });
+  let tweeterAddress = tweeter ? tweeter.address : null;
+  await contract.methods.close("0x" + uuid, tweeterAddress || ourAddress).send({
+    from: ourAddress
+  });
 
   if (shouldTweet) {
     // We're a-tweeting!

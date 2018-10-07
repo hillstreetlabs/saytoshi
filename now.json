@@ -2,8 +2,8 @@
   "alias": ["alpha.saytoshi.com"],
   "env": {
     "URL": "https://alpha.saytoshi.com",
-    "TWEETH_ADDRESS": "0xbff6f7d6404e94dfd6d84a5b9e62cb0c4a242126",
-    "VOTER_ADDRESS": "0x5bf1e71d44905cc49eb667c6468c91858f861561",
+    "TWEETH_ADDRESS": "0xc5ad27205102beb999bac35a6362fad4fc64464e",
+    "VOTER_ADDRESS": "0x1ee42b69c0103866250fed624cdc1027ac4dbfda",
     "MONGODB_URL": "@saytoshi-mongodb-url",
     "ETHEREUM_HTTP": "@saytoshi-ethereum-http",
     "GITHUB_CLIENT_ID": "@saytoshi-github-client-id",
