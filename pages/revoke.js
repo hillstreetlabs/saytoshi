@@ -31,20 +31,12 @@ export default class Revoke extends React.Component {
       <AppLayout>
         <Box>
           <div style={{ textAlign: "center" }}>
-            <h1 style={{ fontSize: 60 }}>🤑</h1>
-            <h2 style={{ fontWeight: 500 }}>Make money from your following.</h2>
-            <Spacer />
-            <h3 style={{ fontWeight: 400, color: "#555" }}>
-              Connect your Twitter. The SayToshi community will pay to tweet as
-              you. Revoke access at any time.
-            </h3>
+            <h2 style={{ fontWeight: 400 }}>Revoke access to your Twitter</h2>
           </div>
-          <Spacer size={1.5} />
-          {this.props.store.currentAddress && (
-            <a href={`/auth/twitter`} style={{ textDecoration: "none" }}>
-              <Button>Connect Twitter</Button>
-            </a>
-          )}
+          <Spacer />
+          <a href={`/auth/twitter`} style={{ textDecoration: "none" }}>
+            <Button>Revoke SayToshi access</Button>
+          </a>
         </Box>
       </AppLayout>
     );

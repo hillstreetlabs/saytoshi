@@ -218,6 +218,11 @@ export default class ProposeTweet extends React.Component {
         )}
 
         <Spacer />
+        <div style={{ textAlign: "center" }}>
+          <Link href="/revoke">
+            <a>Need to revoke SayToshi access?</a>
+          </Link>
+        </div>
       </AppLayout>
     );
   }

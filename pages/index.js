@@ -20,6 +20,21 @@ const Photo = styled.img`
   border: 2px solid #822dff;
 `;
 
+const Button = styled("button")`
+  background-color: #381de8;
+  padding: 16px 22px;
+  border-radius: ${basePadding}px;
+  border: none;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 1px 2px rgba(50, 50, 93, 0.11), 0 1px 2px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+
+  &:active {
+    box-shadow: 0 2px 4px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+`;
+
 const Tweeter = styled("div")`
   display: flex;
   justify-content: space-between;
@@ -117,6 +132,13 @@ export default class Index extends React.Component {
             <Spacer />
           </div>
         ))}
+        <Spacer />
+        <div style={{ textAlign: "center" }}>
+          <Link href="/connect">
+            <Button>Connect your own Twitter</Button>
+          </Link>
+        </div>
+
         <Spacer size={3} />
       </AppLayout>
     );
