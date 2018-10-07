@@ -15,6 +15,7 @@ import distanceInWords from "date-fns/distance_in_words";
 import Countdown from "react-countdown-now";
 import graphqlFetch from "../web/graphqlFetch";
 import { utils } from "ethers";
+import { now } from "mobx-utils";
 
 @inject("store")
 @withRouter
@@ -24,7 +25,7 @@ export default class TweetPage extends React.Component {
   voteAmounts = observable.map({});
   didVote = observable.map({});
 
-  static async getInitialProps({ req }) {
+  static async getInitialProps({ query }) {
     const tweetQuery = `
       query GetTweet($uuid: ID!) {
         tweet(uuid: $uuid) {
@@ -37,18 +38,30 @@ export default class TweetPage extends React.Component {
           }
         }
       }`;
-    const { tweet } = await graphqlFetch(tweetQuery, { uuid: req.params.uuid });
+    const { tweet } = await graphqlFetch(tweetQuery, { uuid: query.uuid });
     return { tweet };
   }
 
   render() {
     const { username } = this.props.router.query;
+    const { tweet } = this.props;
+    const votingEndsAt = new Date(tweet.votingEndsAt).getTime();
+    const rightNow = now();
+    console.log(rightNow);
+    let status = "voting";
+    if (rightNow - votingEndsAt > 0) status = "pending";
+    if (rightNow - votingEndsAt > 120000) status = "claiming";
     return (
       <AppLayout>
         <Spacer />
-        <Subheader username={this.props.tweet.tweeter.handle} selected="vote" />
+        <Subheader
+          username={this.props.tweet.tweeter.handle}
+          selected={status === "voting" ? "vote" : undefined}
+        />
         <Spacer size={1.5} />
-        <Vote tweet={this.props.tweet} />
+        {status === "claiming" && <div>Claim</div>}
+        {status === "pending" && <div>Pending</div>}
+        {status === "voting" && <Vote tweet={this.props.tweet} />}
       </AppLayout>
     );
   }
