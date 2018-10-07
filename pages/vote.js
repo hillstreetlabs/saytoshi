@@ -7,6 +7,8 @@ import Subheader from "../components/Subheader";
 import AppLayout from "../components/AppLayout";
 import Spacer from "../components/Spacer";
 import { Box } from "./tweet";
+import distanceInWords from "date-fns/distance_in_words";
+import Countdown from "react-countdown-now";
 
 @inject("store")
 @withRouter
@@ -32,9 +34,16 @@ export default class Vote extends React.Component {
     const { username } = this.props.router.query;
     return (
       <AppLayout>
-        <Subheader username={username} selected="vote" />
         <Spacer />
-        Vote.
+        <Subheader username={username} selected="vote" />
+        <Spacer size={1.5} />
+        {this.contests.map(contest => (
+          <div>
+            Voting ends in <Countdown date={contest.time} />
+            <Box>{contest.text}</Box>
+            <Spacer />
+          </div>
+        ))}
       </AppLayout>
     );
   }

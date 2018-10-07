@@ -6,7 +6,7 @@ import Spacer from "./Spacer";
 
 const HeaderContainer = styled("div")`
   width: 100%;
-  height: 60px;
+  height: 40px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -30,9 +30,11 @@ export default class Header extends React.Component {
           <Link href="/">
             <Logo src="/static/logo.png" />
           </Link>
-          <div>
-            <div>{this.props.store.currentAddress}</div>
-            <div>Balance TODO</div>
+          <div style={{ textAlign: "right" }}>
+            <div>Balance</div>
+            <div>
+              20 <small>TWEETH</small>
+            </div>
           </div>
         </HeaderContainer>
         <Spacer />

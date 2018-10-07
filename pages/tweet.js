@@ -9,7 +9,7 @@ import Spacer from "../components/Spacer";
 import Divider from "../components/Divider";
 import Wrapper from "../components/Wrapper";
 
-const basePadding = 14;
+const basePadding = 10;
 
 export const Box = styled("div")`
   background-color: white;
@@ -20,8 +20,8 @@ export const Box = styled("div")`
 
 const Textarea = styled("textarea")`
   width: 100%;
-  padding: ${basePadding}px;
-  font-size: 28px;
+  padding: ${basePadding * 1.5}px ${basePadding}px;
+  font-size: ${basePadding * 2}px;
   background-color: #eee;
   border-radius: ${basePadding / 2}px;
   border: none;
@@ -43,8 +43,8 @@ const InputGroup = styled("div")`
 `;
 
 const Input = styled("input")`
-  padding: ${basePadding}px;
-  font-size: 30px;
+  padding: ${basePadding * 1.5}px ${basePadding}px;
+  font-size: ${basePadding * 3}px;
   width: 90%;
   background-color: transparent;
   border: none;
@@ -55,10 +55,15 @@ const Button = styled("button")`
   color: white;
   width: 100%;
   display: block;
-  font-size: 22px;
-  padding: ${basePadding * 1.5}px;
+  font-size: 18px;
+  padding: ${basePadding * 2}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
+`;
+
+const FormHeading = styled("h2")`
+  font-size: ${basePadding * 2}px;
+  font-weight: 500;
 `;
 
 @inject("store")
@@ -69,21 +74,35 @@ export default class ProposeTweet extends React.Component {
     const { username } = this.props.router.query;
     return (
       <AppLayout>
-        <Subheader username={username} selected="tweet" />
         <Spacer />
+        <Subheader username={username} selected="tweet" />
+        <Spacer size={1.5} />
         <Box>
-          <h2>What do you want @{username} to say?</h2>
-          <Spacer size={0.5} />
-          <Textarea placeholder={"Type your tweet here."} rows={3} />
+          <FormHeading>
+            What do you want{" "}
+            <strong style={{ fontWeight: 600, textDecoration: "underline" }}>
+              @{username}
+            </strong>{" "}
+            to say?
+          </FormHeading>
           <Spacer />
-          <h2>How much are you staking on this tweet?</h2>
+          <Textarea placeholder={"Type your tweet here."} rows={5} />
+          <Spacer />
+          <FormHeading>How much are you staking on this tweet?</FormHeading>
           <Spacer size={0.5} />
+          <h4 style={{ fontWeight: 400, color: "#555" }}>
+            If your tweet isn't approved, you'll lose this money.
+          </h4>
+          <Spacer />
           <InputGroup>
             <Input />
             <label>TWEETH</label>
           </InputGroup>
-          <Spacer />
-          <Button>Propose tweet for @{username}</Button>
+          <Spacer size={1.25} />
+          <Button>
+            Propose tweet for{" "}
+            <strong style={{ fontWeight: 600 }}>@{username}</strong>
+          </Button>
         </Box>
         <Spacer />
       </AppLayout>

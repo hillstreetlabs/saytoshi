@@ -2,6 +2,7 @@ import styled from "react-emotion";
 import Wrapper from "./Wrapper";
 import Header from "./Header";
 import Footer from "./Footer";
+import Spacer from "./Spacer";
 
 const Background = styled("div")`
   position: fixed;
@@ -35,6 +36,7 @@ export default class AppLayout extends React.Component {
             <Header />
             {this.props.children}
             <Footer />
+            <Spacer />
           </Wrapper>
         </Container>
       </div>

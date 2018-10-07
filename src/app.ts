@@ -202,6 +202,10 @@ export default async function createApp() {
     return handle(req, res);
   });
 
+  app.get("/connect", (req, res) => {
+    return handle(req, res);
+  });
+
   // Custom routes
   app.get("/:username", (req, res) => {
     const actualPage = "/tweet";
