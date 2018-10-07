@@ -211,7 +211,7 @@ export default class ProposeTweet extends React.Component {
             {this.props.store.currentAddress ? (
               <Button
                 type="submit"
-                disabled={!this.tweetIsReady || this.tweetStatus !== "none"}
+                disabled={!this.tweetIsReady || this.createStatus !== "none"}
               >
                 {this.createStatus === "signing" && (
                   <span>Check your wallet for details</span>

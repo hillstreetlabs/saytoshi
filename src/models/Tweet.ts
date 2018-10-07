@@ -17,7 +17,8 @@ export type TweetModel = mongoose.Document & {
     | "expired"
     | "rejected"
     | "accepted"
-    | "tweeted";
+    | "tweeted"
+    | "error";
   stake: string;
   votes: VoteModel[];
   tweeterId: string;

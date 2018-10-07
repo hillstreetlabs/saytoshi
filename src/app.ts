@@ -32,15 +32,18 @@ export default async function createApp() {
   const watcher = new BlockWatcher(web3);
 
   // Hacky "scheduled jobs" -- would ideally be done with cron
-  setInterval(() => closeProposedTweets(web3), 20000); // TODO: Every ten minutes
+  setInterval(() => closeProposedTweets(web3), 20000);
 
   // This is a super hacky way of predictably scheduling things with setInterval
   const timeBetweenTweets = 120000;
   let nextTweetTime = Date.now() + timeBetweenTweets;
   const getQueuedTweetTime = (queuePosition: number) =>
     new Date(nextTweetTime + timeBetweenTweets * queuePosition);
-  setInterval(() => {
-    postTopTweet();
+  setInterval(async () => {
+    const tweeters = await Tweeter.find({});
+    for (let tweeter of tweeters) {
+      postTopTweet(tweeter.handle);
+    }
     nextTweetTime = Date.now() + timeBetweenTweets;
   }, timeBetweenTweets);
 
