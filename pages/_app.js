@@ -4,6 +4,7 @@ import React from "react";
 import { observer, Provider } from "mobx-react";
 import Store from "../web/Store";
 
+@observer
 export default class MyApp extends App {
   store = new Store();
 

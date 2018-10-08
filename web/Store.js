@@ -1,4 +1,4 @@
-import { observable, when } from "mobx";
+import { observable, when, computed } from "mobx";
 import { providers, Contract } from "ethers";
 import { BigNumber } from "bignumber.js";
 const TweEthVoter = require("../abis/TweEthVoter");
@@ -13,6 +13,7 @@ export default class Store {
 
   @observable voterContract = undefined;
   @observable tokenContract = undefined;
+  @observable networkName = undefined;
 
   async start() {
     let web3 = null;
@@ -32,6 +33,7 @@ export default class Store {
     this.provider = isShimmed
       ? new providers.JsonRpcProvider(process.env.ETHEREUM_HTTP)
       : new providers.Web3Provider(web3);
+
     this.voterContract = new Contract(
       process.env.VOTER_ADDRESS,
       TweEthVoter,
@@ -53,11 +55,13 @@ export default class Store {
       setTimeout(() => this.initAccount(), 2000);
       return;
     }
-    const allowance = await this.tokenContract.allowance(
-      this.currentAddress,
-      process.env.VOTER_ADDRESS
-    );
-    this.isUnlocked = !allowance.isZero();
+    try {
+      const allowance = await this.tokenContract.allowance(
+        this.currentAddress,
+        process.env.VOTER_ADDRESS
+      );
+      this.isUnlocked = !allowance.isZero();
+    } catch (e) {}
   }
 
   stop() {
@@ -81,12 +85,26 @@ export default class Store {
   }
 
   async getBalances() {
+    const networkName = (await this.provider.getNetwork()).name;
+    this.networkName = networkName === "homestead" ? "mainnet" : networkName;
     const totalSupply = await this.tokenContract.totalSupply();
     this.quorum = new BigNumber(totalSupply.toString()).div(
       new BigNumber("100")
     );
     if (!this.hasWeb3) return;
     this.tokenBalance = await this.tokenContract.balanceOf(this.currentAddress);
+  }
+
+  @computed
+  get desiredNetwork() {
+    const shouldBeOnMainnet = !!process.env.ETHEREUM_HTTP.match(/mainnet/);
+    return shouldBeOnMainnet ? "mainnet" : "kovan";
+  }
+
+  @computed
+  get isWrongNetwork() {
+    if (!this.networkName) return false;
+    return this.networkName !== this.desiredNetwork;
   }
 
   get hasWeb3() {

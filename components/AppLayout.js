@@ -4,6 +4,7 @@ import Wrapper from "./Wrapper";
 import Header from "./Header";
 import Footer from "./Footer";
 import Spacer from "./Spacer";
+import ErrorPage from "./ErrorPage";
 
 const Background = styled("div")`
   position: fixed;
@@ -37,7 +38,17 @@ export default class AppLayout extends React.Component {
         <Container>
           <Wrapper>
             <Header />
-            {this.props.children}
+            {this.props.store.isWrongNetwork ? (
+              <ErrorPage>
+                <h1>Wrong network</h1>
+                <p>
+                  Switch over to {this.props.store.desiredNetwork} to use
+                  SayToshi.
+                </p>
+              </ErrorPage>
+            ) : (
+              this.props.children
+            )}
             <Footer />
             <Spacer />
           </Wrapper>
