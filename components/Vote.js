@@ -243,7 +243,7 @@ class ResolvedTweet extends React.Component {
             <div>
               {claimableAmount ? (
                 claimableAmount.isZero() ? (
-                  <div style={{ color: "#aaa" }}>Nothing to redeem</div>
+                  <div style={{ marginTop: -20 }} />
                 ) : (
                   <Button
                     onClick={() => this.claim()}

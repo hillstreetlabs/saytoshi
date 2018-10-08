@@ -41,6 +41,12 @@ export default class Store {
     );
 
     this.currentAddress = (await this.provider.listAccounts())[0];
+    if (!this.currentAddress)
+      return (
+        console.error("no address"),
+        setTimeout(() => this.start(), 2000),
+        undefined
+      );
     const allowance = await this.tokenContract.allowance(
       this.currentAddress,
       process.env.VOTER_ADDRESS

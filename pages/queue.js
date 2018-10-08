@@ -1,5 +1,5 @@
 import { observer, inject } from "mobx-react";
-import { observable } from "mobx";
+import { observable, computed } from "mobx";
 import Link from "next/link";
 import { withRouter } from "next/router";
 import Header from "../components/Header";
@@ -11,6 +11,7 @@ import { Box } from "./tweet";
 import distanceInWords from "date-fns/distance_in_words";
 import Countdown from "react-countdown-now";
 import graphqlFetch from "../web/graphqlFetch";
+import Vote from "../components/Vote";
 
 @inject("store")
 @withRouter
@@ -29,6 +30,8 @@ export default class Queue extends React.Component {
           proposedAt
           votingEndsAt
           tweetAt
+          tweetedAt
+          tweetId
           status
           tweeter {
             handle
@@ -63,6 +66,22 @@ export default class Queue extends React.Component {
     return this.props.tweets;
   }
 
+  @computed
+  get queuedTweets() {
+    return this.tweets.filter(t => t.status === "accepted");
+  }
+
+  @computed
+  get tweetedTweets() {
+    return this.tweets.filter(t => t.status === "tweeted");
+  }
+
+  tweetLink(tweet) {
+    return `https://twitter.com/${tweet.tweeter.handle}/status/${
+      tweet.tweetId
+    }`;
+  }
+
   render() {
     const { username } = this.props.router.query;
     return (
@@ -70,9 +89,9 @@ export default class Queue extends React.Component {
         <Spacer />
         <Subheader username={username} selected="queue" />
         <Spacer size={1.5} />
-        {this.tweets.map((tweet, i) => (
+        {this.queuedTweets.map((tweet, i) => (
           <div key={i}>
-            🚀 in <Countdown date={tweet.tweetAt} />
+            🚀 Sending in <Countdown date={tweet.tweetAt} />
             <Spacer size={0.25} />
             <Box>
               <h3 style={{ fontWeight: 400, lineHeight: 1.4, fontSize: 20 }}>
@@ -82,11 +101,15 @@ export default class Queue extends React.Component {
             <Spacer />
           </div>
         ))}
+        {this.tweetedTweets.map((tweet, i) => (
+          <Vote key={tweet.uuid} tweet={tweet} />
+        ))}
+
         {this.tweets.length === 0 && (
           <div style={{ textAlign: "center" }}>
             <Spacer size={2} />
             <h3 style={{ color: "#555", fontWeight: 400 }}>
-              No tweets in the queue for @{username}.{" "}
+              No tweets sent out by @{username}.{" "}
               <Link as={`/${username}`} href={`/tweet?username=${username}`}>
                 <a>Add one now.</a>
               </Link>

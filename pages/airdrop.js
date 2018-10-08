@@ -20,12 +20,18 @@ const Button = styled("button")`
   padding: ${basePadding * 2}px ${basePadding}px;
   border-radius: ${basePadding / 2}px;
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+  }
 `;
 
 @inject("store")
 @withRouter
 @observer
 export default class Airdrop extends React.Component {
+  @observable isLoading = false;
+
   static getInitialProps({ req }) {
     if (!req) return {};
     return {
@@ -98,13 +104,26 @@ export default class Airdrop extends React.Component {
               href={`/airdrop/to/${this.props.store.currentAddress}`}
               style={{ textDecoration: "none" }}
             >
-              <Button>Authenticate with Github</Button>
+              <Button
+                disabled={this.isLoading}
+                onClick={() => (this.isLoading = true)}
+              >
+                {this.isLoading
+                  ? "Authenticating..."
+                  : "Authenticate with Github"}
+              </Button>
             </a>
           ) : (
             <Alert>
               Please make sure you are connected to Ethereum and your wallet is
               unlocked.
             </Alert>
+          )}
+          {this.isLoading && (
+            <div style={{ textAlign: "center" }}>
+              <Spacer small />
+              <small>This can take a moment!</small>
+            </div>
           )}
         </Box>
       </AppLayout>

@@ -82,16 +82,23 @@ const resolvers = [
         ctx: { getQueuedTweetTime: Function }
       ) => {
         const tweeter = await Tweeter.findOne({ handle: args.handle });
-        const tweets = await Tweet.find({
+        let queuedTweets = await Tweet.find({
           status: "accepted",
           tweeterId: tweeter._id
         }).sort({
           yesStake: "-1"
         });
-        return tweets.map((tweet, i) => ({
+        queuedTweets = queuedTweets.map((tweet, i) => ({
           tweetAt: ctx.getQueuedTweetTime(i),
           ...tweet.toObject()
         }));
+        const sentTweets = await Tweet.find({
+          status: "tweeted",
+          tweeterId: tweeter._id
+        }).sort({
+          tweetedAt: "-1"
+        });
+        return queuedTweets.concat(sentTweets);
       },
       rejectedTweets: async () => {
         const tweets = await Tweet.find({ status: "rejected" });
