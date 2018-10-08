@@ -3,7 +3,7 @@
     "dev": "nodemon",
     "build": "NODE_ENV=production tsc && NODE_ENV=production next build",
     "start": "NODE_ENV=production node dist/index.js",
-    "postinstall": "npm run build"
+    "postinstall": "if [ $BUILD_ASSETS ]; then npm run build; fi"
   },
   "dependencies": {
     "@babel/plugin-proposal-decorators": "^7.1.2",
