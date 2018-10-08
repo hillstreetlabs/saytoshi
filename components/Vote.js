@@ -406,6 +406,11 @@ export default class Vote extends React.Component {
   @computed
   get percentageToQuorum() {
     if (!this.props.store.quorum) return 0;
+    if (
+      this.props.tweet.status === "accepted" ||
+      this.props.tweet.status === "tweeted"
+    )
+      return 100; // quorum was reached
     const quorum = utils.bigNumberify(this.props.store.quorum.toString());
     let number = parseFloat(
       this.totalAmountStaked

@@ -16,7 +16,7 @@ export default class Store {
 
   async start() {
     let web3 = null;
-    let isShimmed = true;
+    let isShimmed = false;
     if (window.ethereum) {
       try {
         await window.ethereum.enable();
@@ -50,7 +50,6 @@ export default class Store {
   async initAccount() {
     this.currentAddress = (await this.provider.listAccounts())[0];
     if (!this.currentAddress) {
-      console.error("locked");
       setTimeout(() => this.initAccount(), 2000);
       return;
     }
